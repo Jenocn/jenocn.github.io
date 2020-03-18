@@ -171,6 +171,35 @@
         <a href="/2020/03/UnityAssetBundle/" class="archive-article-date">
   	<time datetime="2020-03-11T08:39:55.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-11</time>
 </a>
+
+
+	<!-- 不蒜子统计 -->
+	<span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+		  <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+	</span>
+
+        <!-- 开始添加字数统计-->
+        
+          <div style="margin-top:10px;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">1.3k字</span>
+      </span>
+    </span>
+
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">  阅读时长: </span>
+        <span class="post-count">4分</span>
+      </span>
+    </span>
+</div>
+          
+        <!-- 添加完成 -->
         
       </header>
     
@@ -355,6 +384,28 @@
   
 
   
+    <div id="gitalk-container"></div>
+    <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+
+<script>
+	var gitalk = new Gitalk({
+		clientID: '',
+		clientSecret: '',
+		repo: 'jenocn.github.io',
+		owner: 'jenocn',
+		admin: ['jenocn'],
+		id: md5(window.location.pathname),
+		distractionFreeMode: true
+})
+
+	gitalk.render('gitalk-container')
+</script>Î
+  
+
+  
 
 
           </div>
@@ -365,9 +416,6 @@
 		<div id="footer-info">
 			<div class="footer-left">
 				&copy; 2020 <a href="https://jenocn.github.io" target="_blank" rel="noopener">Jenocn</a>
-				<span id="busuanzi_container_site_uv">
-					浏览量:<span id="busuanzi_value_site_uv"></span>
-				</span>
 			</div>
 			<div class="footer-right">
 				<a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a
@@ -375,8 +423,17 @@
 			</div>
 		</div>
 	</div>
-	<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
-	</script>
+	
+        <!-- 不蒜子统计 -->
+        <span id="busuanzi_container_site_pv">
+                本站总访问量<span id="busuanzi_value_site_pv"></span>次
+        </span>
+        <span class="post-meta-divider">|</span>
+        <span id="busuanzi_container_site_uv" style='display:none'>
+                本站访客数<span id="busuanzi_value_site_uv"></span>人
+        </span>
+		<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+	
 </footer>
     </div>
     <script>
@@ -449,11 +506,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">GameScript</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">Unity</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">GameScript</a>
+                <a href="javascript:void(0)" class="js-tag color2">python</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -462,10 +523,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">C++</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">python</a>
               </li>
              
               <li class="article-tag-list-item">
