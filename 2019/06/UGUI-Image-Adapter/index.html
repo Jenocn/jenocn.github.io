@@ -5,26 +5,26 @@
   
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <link rel="dns-prefetch" href="http://jenocn.com">
+  <link rel="dns-prefetch" href="https://jenocn.github.io">
   <title>UGUI动态创建Image保持宽高比和分辨率适配 | Jenocn</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="很多情况下没办法事先在编辑器中确定需要展示的Image,需要动态去创建,例如根据角色ID显示角色的立绘,本文讲一讲动态创建时需要注意的两个问题:  保持宽高比 分辨率适配">
 <meta property="og:type" content="article">
 <meta property="og:title" content="UGUI动态创建Image保持宽高比和分辨率适配">
-<meta property="og:url" content="http://jenocn.com/2019/06/UGUI-Image-Adapter/index.html">
+<meta property="og:url" content="https://jenocn.github.io/2019/06/UGUI-Image-Adapter/index.html">
 <meta property="og:site_name" content="Jenocn">
 <meta property="og:description" content="很多情况下没办法事先在编辑器中确定需要展示的Image,需要动态去创建,例如根据角色ID显示角色的立绘,本文讲一讲动态创建时需要注意的两个问题:  保持宽高比 分辨率适配">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://jenocn.com/2019/06/UGUI-Image-Adapter/1.png">
-<meta property="og:image" content="http://jenocn.com/2019/06/UGUI-Image-Adapter/2.png">
-<meta property="og:image" content="http://jenocn.com/2019/06/UGUI-Image-Adapter/3.png">
+<meta property="og:image" content="https://jenocn.github.io/2019/06/UGUI-Image-Adapter/1.png">
+<meta property="og:image" content="https://jenocn.github.io/2019/06/UGUI-Image-Adapter/2.png">
+<meta property="og:image" content="https://jenocn.github.io/2019/06/UGUI-Image-Adapter/3.png">
 <meta property="article:published_time" content="2019-06-03T04:01:21.000Z">
-<meta property="article:modified_time" content="2020-03-16T06:20:48.665Z">
+<meta property="article:modified_time" content="2020-03-18T10:31:20.678Z">
 <meta property="article:author" content="Jenocn">
 <meta property="article:tag" content="编程">
 <meta property="article:tag" content="Unity">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://jenocn.com/2019/06/UGUI-Image-Adapter/1.png">
+<meta name="twitter:image" content="https://jenocn.github.io/2019/06/UGUI-Image-Adapter/1.png">
   
     <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
   
@@ -185,7 +185,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-keyboard-o"></i>
         <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">450字</span>
+        <span class="post-count">435字</span>
       </span>
     </span>
 
@@ -230,10 +230,31 @@
 
 <h3 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h3><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> sprite = Resources.Load&lt;Sprite&gt;(path);</span><br><span class="line"><span class="keyword">if</span> (sprite) &#123;</span><br><span class="line">    <span class="keyword">var</span> image = <span class="keyword">new</span> GameObject(<span class="string">"image"</span>).AddComponent&lt;Image&gt;();</span><br><span class="line">    image.rectTransform.SetParent(_parentTransform);</span><br><span class="line">    image.sprite = sprite;</span><br><span class="line">    image.SetNativeSize();</span><br><span class="line">    image.rectTransform.sizeDelta *= image.canvas.scaleFactor;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<hr>
-<p>我的博客:<br><a href="https://jenocn.github.io/" target="_blank">https://jenocn.github.io/</a><br>我的邮箱:<br><a href="mailto:544673717@qq.com">544673717@qq.com</a>  </p>
-
       
+
+      <!-- 个人信息展示 -->
+      
+        <div>
+          <hr>
+          <p>Jenocn:
+            <br>
+            <i class="icon-github"></i> <a href="https://github.com/Jenocn" title="UGUI动态创建Image保持宽高比和分辨率适配" target="_blank">https://github.com/Jenocn</a>
+            <br>
+            <i class="icon-link"></i> <a href="https://jenocn.github.io/2019/06/UGUI-Image-Adapter/" title="UGUI动态创建Image保持宽高比和分辨率适配" target="_blank">https://jenocn.github.io/2019/06/UGUI-Image-Adapter/</a>
+            <br>
+            <i class="icon-mail"></i> <a href="mailto:544673717@qq.com">544673717@qq.com</a>
+          </p>
+        </div>
+      
+      <!-- 个人信息展示 -->
+
+      <!-- 添加版权声明 -->
+    
+    
+      <div class="declare" hidden="hidden"></div>
+    
+      <!-- 添加版权声明 -->
+
 
       
     </div>
@@ -305,7 +326,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://jenocn.com/2019/06/UGUI-Image-Adapter/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://jenocn.github.io/2019/06/UGUI-Image-Adapter/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -377,26 +398,6 @@
   
 
   
-    <div id="gitalk-container"></div>
-    <div id="gitalk-container"></div>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
-
-<script>
-var gitalk = new Gitalk({
-  clientID: '',
-  clientSecret: '',
-  repo: 'https://github.com/Jenocn/jenocn.github.io',
-  owner: 'Jenocn',
-  admin: ['Jenocn'],
-  id: md5(window.location.pathname),
-  distractionFreeMode: false
-})
-
-gitalk.render('gitalk-container')
-</script>
-  
 
   
 
@@ -408,7 +409,7 @@ gitalk.render('gitalk-container')
 	<div class="outer">
 		<div id="footer-info">
 			<div class="footer-left">
-				&copy; 2020 <a href="https://jenocn.github.io" target="_blank" rel="noopener">Jenocn</a>
+				&copy; 2020 <a href="https://jenocn.github.io">Jenocn</a>
 			</div>
 			<div class="footer-right">
 				<a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a

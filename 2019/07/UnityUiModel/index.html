@@ -5,25 +5,25 @@
   
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <link rel="dns-prefetch" href="http://jenocn.com">
+  <link rel="dns-prefetch" href="https://jenocn.github.io">
   <title>极简的Unity UI框架 | Jenocn</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="这是一个非常非常Pure的UI框架,很适合小型项目,在我写的项目中,经过大量的UI开发,这个框架稳定,易用并满足需求.  设计   UI生命周期   UiModel类   UiStack类   使用">
 <meta property="og:type" content="article">
 <meta property="og:title" content="极简的Unity UI框架">
-<meta property="og:url" content="http://jenocn.com/2019/07/UnityUiModel/index.html">
+<meta property="og:url" content="https://jenocn.github.io/2019/07/UnityUiModel/index.html">
 <meta property="og:site_name" content="Jenocn">
 <meta property="og:description" content="这是一个非常非常Pure的UI框架,很适合小型项目,在我写的项目中,经过大量的UI开发,这个框架稳定,易用并满足需求.  设计   UI生命周期   UiModel类   UiStack类   使用">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://jenocn.com/2019/07/UnityUiModel/ui_model_life_cycle_graph.png">
+<meta property="og:image" content="https://jenocn.github.io/2019/07/UnityUiModel/ui_model_life_cycle_graph.png">
 <meta property="article:published_time" content="2019-07-23T07:06:22.000Z">
-<meta property="article:modified_time" content="2020-03-16T06:20:48.674Z">
+<meta property="article:modified_time" content="2020-03-18T10:31:54.608Z">
 <meta property="article:author" content="Jenocn">
 <meta property="article:tag" content="编程">
 <meta property="article:tag" content="Unity">
 <meta property="article:tag" content="框架">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://jenocn.com/2019/07/UnityUiModel/ui_model_life_cycle_graph.png">
+<meta name="twitter:image" content="https://jenocn.github.io/2019/07/UnityUiModel/ui_model_life_cycle_graph.png">
   
     <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
   
@@ -227,10 +227,32 @@
 <p><code>UiModel Push(GameObject prefab)</code>传入一个事先制作好的UI Prefab,打开这个UI并返回<code>UiModel</code>对象<br><code>void Pop()</code>弹出当前焦点UI</p>
 <figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> System.Collections.Generic;</span><br><span class="line"><span class="keyword">using</span> UnityEngine;</span><br><span class="line"><span class="keyword">using</span> UnityEngine.UI;</span><br><span class="line"></span><br><span class="line">[<span class="meta">RequireComponent(typeof(Canvas))</span>]</span><br><span class="line">[<span class="meta">RequireComponent(typeof(CanvasScaler))</span>]</span><br><span class="line">[<span class="meta">RequireComponent(typeof(CanvasGroup))</span>]</span><br><span class="line">[<span class="meta">RequireComponent(typeof(GraphicRaycaster))</span>]</span><br><span class="line">[<span class="meta">RequireComponent(typeof(RectTransform))</span>]</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">sealed</span> <span class="keyword">class</span> <span class="title">UiStack</span> : <span class="title">MonoBehaviour</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> RectTransform _rectTransform = <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">private</span> LinkedList&lt;UiModel&gt; _uiStack = <span class="keyword">new</span> LinkedList&lt;UiModel&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Canvas canvas &#123; <span class="keyword">get</span>; <span class="keyword">private</span> <span class="keyword">set</span>; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">Awake</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        _rectTransform = GetComponent&lt;RectTransform&gt;();</span><br><span class="line">        canvas = GetComponent&lt;Canvas&gt;();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">OnDestroy</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        Clear();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> UiModel <span class="title">Push</span>(<span class="params">GameObject prefab</span>)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (!prefab) &#123;</span><br><span class="line">            Debug.LogError(<span class="string">"The prefab is null!"</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!prefab.GetComponent&lt;UiModel&gt;()) &#123;</span><br><span class="line">            Debug.LogError(<span class="string">"It's not a UiModel object!"</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> last = (_uiStack.Last != <span class="literal">null</span>) ? _uiStack.Last.Value : <span class="literal">null</span>;</span><br><span class="line">        <span class="keyword">if</span> (last) &#123;</span><br><span class="line">            last.OnPause();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> model = _InstantiateModel(prefab);</span><br><span class="line">        _uiStack.AddLast(model);</span><br><span class="line">        model._BindUiStack(<span class="keyword">this</span>);</span><br><span class="line">        <span class="keyword">return</span> model;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> T Push&lt;T&gt;(GameObject prefab) <span class="keyword">where</span> T : UiModel &#123;</span><br><span class="line">        <span class="keyword">return</span> Push(prefab) <span class="keyword">as</span> T;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Pop</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (_uiStack.Last == <span class="literal">null</span>) &#123; <span class="keyword">return</span>; &#125;</span><br><span class="line">        <span class="keyword">var</span> model = _uiStack.Last.Value;</span><br><span class="line">        _uiStack.RemoveLast();</span><br><span class="line">        <span class="keyword">if</span> (model) &#123;</span><br><span class="line">            model._BindUiStack(<span class="literal">null</span>);</span><br><span class="line">            <span class="keyword">var</span> delay = model.OnCloseAction();</span><br><span class="line">            <span class="keyword">var</span> last = (_uiStack.Last != <span class="literal">null</span>) ? _uiStack.Last.Value : <span class="literal">null</span>;</span><br><span class="line">            <span class="keyword">if</span> (last) &#123;</span><br><span class="line">                last.OnResume();</span><br><span class="line">            &#125;</span><br><span class="line">            model.OnClose();</span><br><span class="line">            Destroy(model.gameObject, delay);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Clear</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (_uiStack.Last != <span class="literal">null</span>) &#123;</span><br><span class="line">            Pop();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Pause</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> last = (_uiStack.Last != <span class="literal">null</span>) ? _uiStack.Last.Value : <span class="literal">null</span>;</span><br><span class="line">        <span class="keyword">if</span> (last) &#123;</span><br><span class="line">            last.OnPause();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Resume</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> last = (_uiStack.Last != <span class="literal">null</span>) ? _uiStack.Last.Value : <span class="literal">null</span>;</span><br><span class="line">        <span class="keyword">if</span> (last) &#123;</span><br><span class="line">            last.OnResume();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> UiModel _InstantiateModel(GameObject prefab) &#123;</span><br><span class="line">        <span class="keyword">var</span> modelObj = Instantiate(prefab, _rectTransform);</span><br><span class="line">        modelObj.name = prefab.name;</span><br><span class="line">        <span class="keyword">var</span> modelTransform = modelObj.GetComponent&lt;RectTransform&gt;();</span><br><span class="line">        modelTransform.localScale = Vector3.one;</span><br><span class="line">        modelTransform.localPosition = Vector3.zero;</span><br><span class="line">        <span class="keyword">var</span> model = modelObj.GetComponent&lt;UiModel&gt;();</span><br><span class="line">        <span class="keyword">return</span> model;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<hr>
-<p>Jenocn<br><a href="https://jenocn.github.io/" target="_blank">https://jenocn.github.io/</a><br><a href="mailto:544673717@qq.com">544673717@qq.com</a>  </p>
 
       
+
+      <!-- 个人信息展示 -->
+      
+        <div>
+          <hr>
+          <p>Jenocn:
+            <br>
+            <i class="icon-github"></i> <a href="https://github.com/Jenocn" title="极简的Unity UI框架" target="_blank">https://github.com/Jenocn</a>
+            <br>
+            <i class="icon-link"></i> <a href="https://jenocn.github.io/2019/07/UnityUiModel/" title="极简的Unity UI框架" target="_blank">https://jenocn.github.io/2019/07/UnityUiModel/</a>
+            <br>
+            <i class="icon-mail"></i> <a href="mailto:544673717@qq.com">544673717@qq.com</a>
+          </p>
+        </div>
+      
+      <!-- 个人信息展示 -->
+
+      <!-- 添加版权声明 -->
+    
+    
+      <div class="declare" hidden="hidden"></div>
+    
+      <!-- 添加版权声明 -->
+
 
       
     </div>
@@ -306,7 +328,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://jenocn.com/2019/07/UnityUiModel/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://jenocn.github.io/2019/07/UnityUiModel/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -378,26 +400,6 @@
   
 
   
-    <div id="gitalk-container"></div>
-    <div id="gitalk-container"></div>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
-
-<script>
-var gitalk = new Gitalk({
-  clientID: '',
-  clientSecret: '',
-  repo: 'https://github.com/Jenocn/jenocn.github.io',
-  owner: 'Jenocn',
-  admin: ['Jenocn'],
-  id: md5(window.location.pathname),
-  distractionFreeMode: false
-})
-
-gitalk.render('gitalk-container')
-</script>
-  
 
   
 
@@ -409,7 +411,7 @@ gitalk.render('gitalk-container')
 	<div class="outer">
 		<div id="footer-info">
 			<div class="footer-left">
-				&copy; 2020 <a href="https://jenocn.github.io" target="_blank" rel="noopener">Jenocn</a>
+				&copy; 2020 <a href="https://jenocn.github.io">Jenocn</a>
 			</div>
 			<div class="footer-right">
 				<a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a

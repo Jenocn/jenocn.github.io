@@ -5,18 +5,18 @@
   
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <link rel="dns-prefetch" href="http://jenocn.com">
+  <link rel="dns-prefetch" href="https://jenocn.github.io">
   <title>C++基本要点 (值,引用,指针) | Jenocn</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="值,引用,指针,这是c++必须要掌握的要点,但遇到很多人知道这个概念,但是写的代码仍然会犯这样的问题,所以想写下我的理解,从根本上讲一讲这个要点.  值,引用,指针 *右值引用和移动构造">
 <meta property="og:type" content="article">
 <meta property="og:title" content="C++基本要点 (值,引用,指针)">
-<meta property="og:url" content="http://jenocn.com/2019/08/WriteCpp/index.html">
+<meta property="og:url" content="https://jenocn.github.io/2019/08/WriteCpp/index.html">
 <meta property="og:site_name" content="Jenocn">
 <meta property="og:description" content="值,引用,指针,这是c++必须要掌握的要点,但遇到很多人知道这个概念,但是写的代码仍然会犯这样的问题,所以想写下我的理解,从根本上讲一讲这个要点.  值,引用,指针 *右值引用和移动构造">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2019-08-14T00:49:08.000Z">
-<meta property="article:modified_time" content="2020-03-16T06:20:48.676Z">
+<meta property="article:modified_time" content="2020-03-18T10:32:16.614Z">
 <meta property="article:author" content="Jenocn">
 <meta property="article:tag" content="编程">
 <meta property="article:tag" content="技巧">
@@ -246,10 +246,31 @@
 <p>比如需要转移一个容器内的数据:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; temp &#123; <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span> &#125;;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">    这时,将会调用std::vector的移动构造,</span></span><br><span class="line"><span class="comment">    而实现里面会将temp的指针转移到temp2上,</span></span><br><span class="line"><span class="comment">    而temp将会为空(约定上temp将已经被释放)</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">auto</span> temp2 = <span class="built_in">std</span>::move(temp);</span><br></pre></td></tr></table></figure>
 
-<hr>
-<p>Jenocn<br><a href="https://jenocn.github.io/" target="_blank">https://jenocn.github.io/</a><br><a href="mailto:544673717@qq.com">544673717@qq.com</a>  </p>
-
       
+
+      <!-- 个人信息展示 -->
+      
+        <div>
+          <hr>
+          <p>Jenocn:
+            <br>
+            <i class="icon-github"></i> <a href="https://github.com/Jenocn" title="C++基本要点 (值,引用,指针)" target="_blank">https://github.com/Jenocn</a>
+            <br>
+            <i class="icon-link"></i> <a href="https://jenocn.github.io/2019/08/WriteCpp/" title="C++基本要点 (值,引用,指针)" target="_blank">https://jenocn.github.io/2019/08/WriteCpp/</a>
+            <br>
+            <i class="icon-mail"></i> <a href="mailto:544673717@qq.com">544673717@qq.com</a>
+          </p>
+        </div>
+      
+      <!-- 个人信息展示 -->
+
+      <!-- 添加版权声明 -->
+    
+    
+      <div class="declare" hidden="hidden"></div>
+    
+      <!-- 添加版权声明 -->
+
 
       
     </div>
@@ -325,7 +346,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://jenocn.com/2019/08/WriteCpp/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://jenocn.github.io/2019/08/WriteCpp/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -397,26 +418,6 @@
   
 
   
-    <div id="gitalk-container"></div>
-    <div id="gitalk-container"></div>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
-
-<script>
-var gitalk = new Gitalk({
-  clientID: '',
-  clientSecret: '',
-  repo: 'https://github.com/Jenocn/jenocn.github.io',
-  owner: 'Jenocn',
-  admin: ['Jenocn'],
-  id: md5(window.location.pathname),
-  distractionFreeMode: false
-})
-
-gitalk.render('gitalk-container')
-</script>
-  
 
   
 
@@ -428,7 +429,7 @@ gitalk.render('gitalk-container')
 	<div class="outer">
 		<div id="footer-info">
 			<div class="footer-left">
-				&copy; 2020 <a href="https://jenocn.github.io" target="_blank" rel="noopener">Jenocn</a>
+				&copy; 2020 <a href="https://jenocn.github.io">Jenocn</a>
 			</div>
 			<div class="footer-right">
 				<a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a

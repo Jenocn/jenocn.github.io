@@ -5,26 +5,26 @@
   
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <link rel="dns-prefetch" href="http://jenocn.com">
+  <link rel="dns-prefetch" href="https://jenocn.github.io">
   <title>Unity AssetBundle从打包到使用 | Jenocn</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="尽管关于AssetBundle的文章非常多了,但是没有看到一篇让人舒服的,都是零零散散的,故本篇目的是从头到尾讲解从打包到使用.  打包 使用 扩展">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Unity AssetBundle从打包到使用">
-<meta property="og:url" content="http://jenocn.com/2020/03/UnityAssetBundle/index.html">
+<meta property="og:url" content="https://jenocn.github.io/2020/03/UnityAssetBundle/index.html">
 <meta property="og:site_name" content="Jenocn">
 <meta property="og:description" content="尽管关于AssetBundle的文章非常多了,但是没有看到一篇让人舒服的,都是零零散散的,故本篇目的是从头到尾讲解从打包到使用.  打包 使用 扩展">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://jenocn.com/2020/03/UnityAssetBundle/step1_1.jpg">
-<meta property="og:image" content="http://jenocn.com/2020/03/UnityAssetBundle/step1_2.jpg">
-<meta property="og:image" content="http://jenocn.com/2020/03/UnityAssetBundle/step2_1.jpg">
+<meta property="og:image" content="https://jenocn.github.io/2020/03/UnityAssetBundle/step1_1.jpg">
+<meta property="og:image" content="https://jenocn.github.io/2020/03/UnityAssetBundle/step1_2.jpg">
+<meta property="og:image" content="https://jenocn.github.io/2020/03/UnityAssetBundle/step2_1.jpg">
 <meta property="article:published_time" content="2020-03-11T08:39:55.000Z">
-<meta property="article:modified_time" content="2020-03-16T06:20:48.667Z">
+<meta property="article:modified_time" content="2020-03-18T10:31:24.332Z">
 <meta property="article:author" content="Jenocn">
 <meta property="article:tag" content="编程">
 <meta property="article:tag" content="Unity">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://jenocn.com/2020/03/UnityAssetBundle/step1_1.jpg">
+<meta name="twitter:image" content="https://jenocn.github.io/2020/03/UnityAssetBundle/step1_1.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
   
@@ -246,10 +246,32 @@
 <p><strong>开发环境和最终发布区分</strong><br>开发时,在得到资源后,每次都要打包一下再使用,确实是不利于效率的,很多资源都是需要频繁修改的,所以一般是在最终发布时打包,那么就需要一个管理类来负责这个事情,拿到的资源直接放在指定的目录下,通过对<code>Application.platform</code>的判断来决定使用何种方式读取资源.</p>
 <p><strong>依赖关系</strong><br>比如有a,b两个包,b中的某个资源依赖于a包中的某个资源,如果使用资源时,只加载b而没有加载a的情况下,b中这个资源则会出问题,需要确保a包也加载,解决这种问题,需要从两个方面下手,一方面是项目资源结构上,需要做到良好区分功能,我的观点是通过功能划分资源,这样一个包则包含这个功能的所有文件,就不需要去加载其他包中的内容了. 另一方面是根据资源的通用程度,划分出通用资源,保持一直存在. 复杂的情况下可以写一个资源层级目录,根据目录,在管理器中判断是否已经加载,没有则层层往上,直到依赖项全部加载为止.</p>
 <p><strong>最后</strong><br>那么本文就结束了,以上想法都是我的心得和浅见,希望能够帮助到大家.</p>
-<hr>
-<p>Jenocn<br><a href="https://jenocn.github.io/" target="_blank">https://jenocn.github.io/</a><br><a href="mailto:544673717@qq.com">544673717@qq.com</a>  </p>
 
       
+
+      <!-- 个人信息展示 -->
+      
+        <div>
+          <hr>
+          <p>Jenocn:
+            <br>
+            <i class="icon-github"></i> <a href="https://github.com/Jenocn" title="Unity AssetBundle从打包到使用" target="_blank">https://github.com/Jenocn</a>
+            <br>
+            <i class="icon-link"></i> <a href="https://jenocn.github.io/2020/03/UnityAssetBundle/" title="Unity AssetBundle从打包到使用" target="_blank">https://jenocn.github.io/2020/03/UnityAssetBundle/</a>
+            <br>
+            <i class="icon-mail"></i> <a href="mailto:544673717@qq.com">544673717@qq.com</a>
+          </p>
+        </div>
+      
+      <!-- 个人信息展示 -->
+
+      <!-- 添加版权声明 -->
+    
+    
+      <div class="declare" hidden="hidden"></div>
+    
+      <!-- 添加版权声明 -->
+
 
       
     </div>
@@ -321,7 +343,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://jenocn.com/2020/03/UnityAssetBundle/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://jenocn.github.io/2020/03/UnityAssetBundle/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -384,26 +406,6 @@
   
 
   
-    <div id="gitalk-container"></div>
-    <div id="gitalk-container"></div>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
-
-<script>
-var gitalk = new Gitalk({
-  clientID: '',
-  clientSecret: '',
-  repo: 'https://github.com/Jenocn/jenocn.github.io',
-  owner: 'Jenocn',
-  admin: ['Jenocn'],
-  id: md5(window.location.pathname),
-  distractionFreeMode: false
-})
-
-gitalk.render('gitalk-container')
-</script>
-  
 
   
 
@@ -415,7 +417,7 @@ gitalk.render('gitalk-container')
 	<div class="outer">
 		<div id="footer-info">
 			<div class="footer-left">
-				&copy; 2020 <a href="https://jenocn.github.io" target="_blank" rel="noopener">Jenocn</a>
+				&copy; 2020 <a href="https://jenocn.github.io">Jenocn</a>
 			</div>
 			<div class="footer-right">
 				<a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a

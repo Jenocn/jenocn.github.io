@@ -5,18 +5,18 @@
   
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <link rel="dns-prefetch" href="http://jenocn.com">
+  <link rel="dns-prefetch" href="https://jenocn.github.io">
   <title>Unity表面着色器笔记(二) | Jenocn</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="上一篇的内容量很少,但是疑问却有不少,比如属性,变量,输入&#x2F;输出结构体,这一篇专门做一个解释. 本文:  Properties属性类型 Shader变量类型 SurfaceOutput结构体 Input结构体">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Unity表面着色器笔记(二)">
-<meta property="og:url" content="http://jenocn.com/2019/08/UnitySurfaceShader2/index.html">
+<meta property="og:url" content="https://jenocn.github.io/2019/08/UnitySurfaceShader2/index.html">
 <meta property="og:site_name" content="Jenocn">
 <meta property="og:description" content="上一篇的内容量很少,但是疑问却有不少,比如属性,变量,输入&#x2F;输出结构体,这一篇专门做一个解释. 本文:  Properties属性类型 Shader变量类型 SurfaceOutput结构体 Input结构体">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2019-08-16T05:39:53.000Z">
-<meta property="article:modified_time" content="2020-03-16T06:20:48.669Z">
+<meta property="article:modified_time" content="2020-03-18T10:31:33.628Z">
 <meta property="article:author" content="Jenocn">
 <meta property="article:tag" content="编程">
 <meta property="article:tag" content="Unity">
@@ -182,7 +182,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-keyboard-o"></i>
         <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">495字</span>
+        <span class="post-count">488字</span>
       </span>
     </span>
 
@@ -213,7 +213,7 @@
 <a id="more"></a>
 
 <hr>
-<p>上一篇:<a href="https://jenocn.github.io/2019/06/UnitySurfaceShader1/" target="_blank" rel="noopener">Unity表面着色器笔记(一)</a></p>
+<p>上一篇:<a href="https://jenocn.github.io/2019/06/UnitySurfaceShader1/">Unity表面着色器笔记(一)</a></p>
 <hr>
 <h2 id="Properties属性类型"><a href="#Properties属性类型" class="headerlink" title="Properties属性类型"></a>Properties属性类型</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Properties &#123;</span><br><span class="line">    &#x2F;&#x2F; 基本数值类型</span><br><span class="line">    _Int (&quot;Int&quot;, Int) &#x3D; 0</span><br><span class="line">    _Float (&quot;Float&quot;, Float) &#x3D; 0</span><br><span class="line">    &#x2F;&#x2F; 数值范围类型,限定了数值的范围,可以在Unity Inspector窗口中通过滑动条赋值</span><br><span class="line">    _Range (&quot;Range&quot;, Range(0, 1)) &#x3D; 0.5</span><br><span class="line">    &#x2F;&#x2F; 表示颜色</span><br><span class="line">    _Color (&quot;Color&quot;, Color) &#x3D; (1, 1, 1, 1)</span><br><span class="line">    &#x2F;&#x2F; 表示一个思维向量</span><br><span class="line">    _Vector (&quot;Vector&quot;, Vector) &#x3D; (0, 0, 0, 0)</span><br><span class="line">    &#x2F;&#x2F; 下面皆为纹理类型</span><br><span class="line">    _2D (&quot;2D&quot;, 2D) &#x3D; &quot;white&quot; &#123;&#125;</span><br><span class="line">    _3D (&quot;3D&quot;, 3D) &#x3D; &quot;white&quot; &#123;&#125;</span><br><span class="line">    _Cube (&quot;Cube&quot;, Cube) &#x3D; &quot;white&quot; &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -234,11 +234,33 @@
 
 <p>参考文章:<a href="http://www.cnblogs.com/-867259206/p/5596698.html" target="_blank" rel="noopener">http://www.cnblogs.com/-867259206/p/5596698.html</a></p>
 <hr>
-<p>下一篇:<a href="https://jenocn.github.io/2019/08/UnitySurfaceShader3/" target="_blank" rel="noopener">Unity表面着色器笔记(三)</a></p>
-<hr>
-<p>Jenocn<br><a href="https://jenocn.github.io/" target="_blank">https://jenocn.github.io/</a><br><a href="mailto:544673717@qq.com">544673717@qq.com</a>  </p>
+<p>下一篇:<a href="https://jenocn.github.io/2019/08/UnitySurfaceShader3/">Unity表面着色器笔记(三)</a></p>
 
       
+
+      <!-- 个人信息展示 -->
+      
+        <div>
+          <hr>
+          <p>Jenocn:
+            <br>
+            <i class="icon-github"></i> <a href="https://github.com/Jenocn" title="Unity表面着色器笔记(二)" target="_blank">https://github.com/Jenocn</a>
+            <br>
+            <i class="icon-link"></i> <a href="https://jenocn.github.io/2019/08/UnitySurfaceShader2/" title="Unity表面着色器笔记(二)" target="_blank">https://jenocn.github.io/2019/08/UnitySurfaceShader2/</a>
+            <br>
+            <i class="icon-mail"></i> <a href="mailto:544673717@qq.com">544673717@qq.com</a>
+          </p>
+        </div>
+      
+      <!-- 个人信息展示 -->
+
+      <!-- 添加版权声明 -->
+    
+    
+      <div class="declare" hidden="hidden"></div>
+    
+      <!-- 添加版权声明 -->
+
 
       
     </div>
@@ -314,7 +336,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://jenocn.com/2019/08/UnitySurfaceShader2/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://jenocn.github.io/2019/08/UnitySurfaceShader2/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -386,26 +408,6 @@
   
 
   
-    <div id="gitalk-container"></div>
-    <div id="gitalk-container"></div>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
-
-<script>
-var gitalk = new Gitalk({
-  clientID: '',
-  clientSecret: '',
-  repo: 'https://github.com/Jenocn/jenocn.github.io',
-  owner: 'Jenocn',
-  admin: ['Jenocn'],
-  id: md5(window.location.pathname),
-  distractionFreeMode: false
-})
-
-gitalk.render('gitalk-container')
-</script>
-  
 
   
 
@@ -417,7 +419,7 @@ gitalk.render('gitalk-container')
 	<div class="outer">
 		<div id="footer-info">
 			<div class="footer-left">
-				&copy; 2020 <a href="https://jenocn.github.io" target="_blank" rel="noopener">Jenocn</a>
+				&copy; 2020 <a href="https://jenocn.github.io">Jenocn</a>
 			</div>
 			<div class="footer-right">
 				<a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a

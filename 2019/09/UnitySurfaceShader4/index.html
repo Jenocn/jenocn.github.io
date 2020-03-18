@@ -5,26 +5,26 @@
   
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <link rel="dns-prefetch" href="http://jenocn.com">
+  <link rel="dns-prefetch" href="https://jenocn.github.io">
   <title>Unity表面着色器笔记(四) - 毛玻璃效果 | Jenocn</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="毛玻璃效果很漂亮,所以来实现一下吧!!">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Unity表面着色器笔记(四) - 毛玻璃效果">
-<meta property="og:url" content="http://jenocn.com/2019/09/UnitySurfaceShader4/index.html">
+<meta property="og:url" content="https://jenocn.github.io/2019/09/UnitySurfaceShader4/index.html">
 <meta property="og:site_name" content="Jenocn">
 <meta property="og:description" content="毛玻璃效果很漂亮,所以来实现一下吧!!">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://jenocn.com/2019/09/UnitySurfaceShader4/shader_img2.jpg">
-<meta property="og:image" content="http://jenocn.com/2019/09/UnitySurfaceShader4/shader_img1.jpg">
+<meta property="og:image" content="https://jenocn.github.io/2019/09/UnitySurfaceShader4/shader_img2.jpg">
+<meta property="og:image" content="https://jenocn.github.io/2019/09/UnitySurfaceShader4/shader_img1.jpg">
 <meta property="article:published_time" content="2019-09-06T07:50:37.000Z">
-<meta property="article:modified_time" content="2020-03-16T06:20:48.671Z">
+<meta property="article:modified_time" content="2020-03-18T10:31:41.039Z">
 <meta property="article:author" content="Jenocn">
 <meta property="article:tag" content="编程">
 <meta property="article:tag" content="Unity">
 <meta property="article:tag" content="Shader">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://jenocn.com/2019/09/UnitySurfaceShader4/shader_img2.jpg">
+<meta name="twitter:image" content="https://jenocn.github.io/2019/09/UnitySurfaceShader4/shader_img2.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
   
@@ -185,7 +185,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-keyboard-o"></i>
         <span class="post-meta-item-text">  字数统计: </span>
-        <span class="post-count">758字</span>
+        <span class="post-count">751字</span>
       </span>
     </span>
 
@@ -209,7 +209,7 @@
 <a id="more"></a>
 
 <hr>
-<p>上一篇:<a href="https://jenocn.github.io/2019/08/UnitySurfaceShader3/" target="_blank" rel="noopener">Unity表面着色器笔记(三)</a></p>
+<p>上一篇:<a href="https://jenocn.github.io/2019/08/UnitySurfaceShader3/">Unity表面着色器笔记(三)</a></p>
 <hr>
 <p>效果展示:<br><img src="shader_img2.jpg" alt="display">  </p>
 <h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>毛玻璃效是一种模糊效果,实现思路应该有很多吧,这里采用最简单的一种方式,以像素为圆心,取周围半径范围内颜色的平均值,即可得到</p>
@@ -226,11 +226,33 @@
 <h2 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h2><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">Shader <span class="string">"Custom/Blur"</span> &#123;</span><br><span class="line">  Properties &#123;</span><br><span class="line">    _MainTex (<span class="string">"Main Texture"</span>, <span class="number">2</span>D) = <span class="string">"white"</span> &#123;&#125;</span><br><span class="line">    _Radius (<span class="string">"Radius (范围)"</span>, Range(<span class="number">0</span>, <span class="number">1</span>)) = <span class="number">0.2</span></span><br><span class="line">    _Smooth (<span class="string">"Smooth (平滑度)"</span>, Range(<span class="number">0</span>, <span class="number">1</span>)) = <span class="number">0.5</span></span><br><span class="line">    _Power (<span class="string">"Power (强度)"</span>, Range(<span class="number">0</span>, <span class="number">1</span>)) = <span class="number">1</span></span><br><span class="line">  &#125;</span><br><span class="line">  SubShader &#123;</span><br><span class="line">    CGPROGRAM</span><br><span class="line"></span><br><span class="line">    <span class="meta">#<span class="meta-keyword">pragma</span> surface surf Standard fullforwardshadows alpha</span></span><br><span class="line">    <span class="meta">#<span class="meta-keyword">pragma</span> target 3.0</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">struct</span> Input &#123;</span><br><span class="line">      float2 uv_MainTex;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    sampler2D _MainTex;</span><br><span class="line">    half _Radius;</span><br><span class="line">    half _Smooth;</span><br><span class="line">    half _Power;</span><br><span class="line"></span><br><span class="line">    <span class="function">half4 <span class="title">GetBlurColor</span>(<span class="params">sampler2D tex, float2 uv, half <span class="keyword">value</span>, half step, half percent</span>)</span> &#123;</span><br><span class="line">      <span class="keyword">value</span> = clamp(<span class="keyword">value</span>, <span class="number">0.001</span>, <span class="number">1</span>);</span><br><span class="line">      step = floor(clamp(step, <span class="number">2</span>, <span class="number">100</span>));</span><br><span class="line">      percent = clamp(percent, <span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">      half4 ret = <span class="number">0</span>;</span><br><span class="line">      half delta = <span class="keyword">value</span> * <span class="number">2</span> / step;</span><br><span class="line">      half count = <span class="number">0</span>;</span><br><span class="line">      half compareValue = <span class="keyword">value</span> * <span class="keyword">value</span>;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">for</span> (half i = -<span class="keyword">value</span>; i &lt; <span class="keyword">value</span>; i += delta) &#123;</span><br><span class="line">        <span class="keyword">for</span> (half j = -<span class="keyword">value</span>; j &lt; <span class="keyword">value</span>; j += delta) &#123;</span><br><span class="line">          <span class="keyword">if</span> (i * i + j * j &gt; compareValue) &#123; <span class="keyword">continue</span>; &#125;</span><br><span class="line">          float2 tempUV = uv + float2(i, j);</span><br><span class="line">          fixed4 c = tex2D(tex, tempUV);</span><br><span class="line">          ret += c;</span><br><span class="line">          count += <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> ret / count * percent + tex2D(tex, uv) * (<span class="number">1</span> - percent);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">surf</span>(<span class="params">Input IN, inout SurfaceOutputStandard o</span>)</span> &#123;</span><br><span class="line">      half4 c = GetBlurColor(_MainTex, IN.uv_MainTex, _Radius, _Smooth * <span class="number">100</span>, <span class="number">0.9</span> + _Power * <span class="number">0.1</span>);</span><br><span class="line">      o.Emission = c.rgb;</span><br><span class="line">      o.Alpha = c.a;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ENDCG</span><br><span class="line">  &#125;</span><br><span class="line">  Fallback <span class="string">"Diffuse"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <hr>
-<p>下一篇:<a href="https://jenocn.github.io/2019/09/UnitySurfaceShader5/" target="_blank" rel="noopener">Unity表面着色器笔记(五)</a></p>
-<hr>
-<p>Jenocn<br><a href="https://jenocn.github.io/" target="_blank">https://jenocn.github.io/</a><br><a href="mailto:544673717@qq.com">544673717@qq.com</a>  </p>
+<p>下一篇:<a href="https://jenocn.github.io/2019/09/UnitySurfaceShader5/">Unity表面着色器笔记(五)</a></p>
 
       
+
+      <!-- 个人信息展示 -->
+      
+        <div>
+          <hr>
+          <p>Jenocn:
+            <br>
+            <i class="icon-github"></i> <a href="https://github.com/Jenocn" title="Unity表面着色器笔记(四) - 毛玻璃效果" target="_blank">https://github.com/Jenocn</a>
+            <br>
+            <i class="icon-link"></i> <a href="https://jenocn.github.io/2019/09/UnitySurfaceShader4/" title="Unity表面着色器笔记(四) - 毛玻璃效果" target="_blank">https://jenocn.github.io/2019/09/UnitySurfaceShader4/</a>
+            <br>
+            <i class="icon-mail"></i> <a href="mailto:544673717@qq.com">544673717@qq.com</a>
+          </p>
+        </div>
+      
+      <!-- 个人信息展示 -->
+
+      <!-- 添加版权声明 -->
+    
+    
+      <div class="declare" hidden="hidden"></div>
+    
+      <!-- 添加版权声明 -->
+
 
       
     </div>
@@ -306,7 +328,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://jenocn.com/2019/09/UnitySurfaceShader4/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://jenocn.github.io/2019/09/UnitySurfaceShader4/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -378,26 +400,6 @@
   
 
   
-    <div id="gitalk-container"></div>
-    <div id="gitalk-container"></div>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
-
-<script>
-var gitalk = new Gitalk({
-  clientID: '',
-  clientSecret: '',
-  repo: 'https://github.com/Jenocn/jenocn.github.io',
-  owner: 'Jenocn',
-  admin: ['Jenocn'],
-  id: md5(window.location.pathname),
-  distractionFreeMode: false
-})
-
-gitalk.render('gitalk-container')
-</script>
-  
 
   
 
@@ -409,7 +411,7 @@ gitalk.render('gitalk-container')
 	<div class="outer">
 		<div id="footer-info">
 			<div class="footer-left">
-				&copy; 2020 <a href="https://jenocn.github.io" target="_blank" rel="noopener">Jenocn</a>
+				&copy; 2020 <a href="https://jenocn.github.io">Jenocn</a>
 			</div>
 			<div class="footer-right">
 				<a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a
