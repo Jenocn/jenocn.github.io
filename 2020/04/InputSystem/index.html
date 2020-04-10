@@ -19,7 +19,7 @@
 <meta property="og:description" content="为了解决一些需求,比如上下左右在地图上是控制角色移动,在菜单界面是控制选项,又比如同样是攻击操作,在键盘上是J键,在手柄上是X键,再比如可以让玩家自定义按键关系,所以就有了这样一个多对多的输入系统.  设计思路   调用方式   实现   完整源码">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-04-10T05:32:04.000Z">
-<meta property="article:modified_time" content="2020-04-10T05:35:32.894Z">
+<meta property="article:modified_time" content="2020-04-10T05:36:35.714Z">
 <meta property="article:author" content="Jenocn">
 <meta property="article:tag" content="编程">
 <meta property="article:tag" content="Unity">
@@ -304,7 +304,7 @@
 <h5 id="实现Update方法-更新所有命令的状态"><a href="#实现Update方法-更新所有命令的状态" class="headerlink" title="实现Update方法,更新所有命令的状态"></a>实现Update方法,更新所有命令的状态</h5><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">Update</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">  <span class="comment">// 首先重置所有命令的状态</span></span><br><span class="line">  <span class="keyword">foreach</span> (<span class="keyword">var</span> item <span class="keyword">in</span> _commands) &#123;</span><br><span class="line">    item.Value.Reset();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 遍历所有的绑定关系,并更新对应命令的按键状态</span></span><br><span class="line">  <span class="keyword">foreach</span> (<span class="keyword">var</span> item <span class="keyword">in</span> _binds) &#123;</span><br><span class="line">    GetButtonValue(item.Value).OrState(</span><br><span class="line">      Input.GetButtonDown(item.Key),</span><br><span class="line">      Input.GetButtonUp(item.Key),</span><br><span class="line">      Input.GetButton(item.Key));</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">foreach</span> (<span class="keyword">var</span> item <span class="keyword">in</span> _keyboardBinds) &#123;</span><br><span class="line">    GetButtonValue(item.Value).OrState(</span><br><span class="line">      Input.GetKeyDown(item.Key),</span><br><span class="line">      Input.GetKeyUp(item.Key),</span><br><span class="line">      Input.GetKey(item.Key));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这个<code>Update</code>在使用时,只需要在一个总的管理系统内调用一次  </p>
 <h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>整个输入系统的代码其实就这么简单,下面将提供完整的源码,包含了对摇杆的支持,希望能够帮助到需要的人.</p>
-<p>源码链接(右键另存为):<br><a href="http://jenocn.github.io/2020/03/InputSystem/InputSystem.cs">http://jenocn.github.io/2020/04/InputSystem/InputSystem.cs</a></p>
+<p>源码链接(右键另存为):<br><a href="http://jenocn.github.io/2020/04/InputSystem/InputSystem.cs">http://jenocn.github.io/2020/04/InputSystem/InputSystem.cs</a></p>
 
       
 
