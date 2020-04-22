@@ -9,14 +9,21 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://jenocn.github.io">
-  <title>Tag: Cocos | Jenocn</title>
+  <title>VSCode C++环境配置 | Jenocn</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Jenocn">
-<meta property="og:url" content="https://jenocn.github.io/tags/Cocos/index.html">
+  <meta name="description" content="VSCode本身是一个文本编辑器,VSCode中开发C++本质上是通过调用编译器的命令来编译和生成可执行文件,但是VSCode可以通过配置相应的配置文件来简化操作,一键调用配置好的命令,从而提高效率.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VSCode C++环境配置">
+<meta property="og:url" content="https://jenocn.github.io/2020/04/VSCodeCppConfig/index.html">
 <meta property="og:site_name" content="Jenocn">
+<meta property="og:description" content="VSCode本身是一个文本编辑器,VSCode中开发C++本质上是通过调用编译器的命令来编译和生成可执行文件,但是VSCode可以通过配置相应的配置文件来简化操作,一键调用配置好的命令,从而提高效率.">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-04-21T15:28:22.000Z">
+<meta property="article:modified_time" content="2020-04-22T02:02:50.503Z">
 <meta property="article:author" content="Jenocn">
+<meta property="article:tag" content="编程">
+<meta property="article:tag" content="C++">
+<meta property="article:tag" content="VSCode">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
@@ -206,37 +213,107 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-VSCodeCppConfig" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/05/ParseRichTool/" class="archive-article-date">
-  	<time datetime="2019-05-07T13:03:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-05-07</time>
-</a>
-
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/05/ParseRichTool/">实现一套富文本解析语法</a>
+    <h1 class="article-title" itemprop="name">
+      VSCode C++环境配置
     </h1>
   
 
-        <div class="article-info info-on-right">
+        
+        <a href="/2020/04/VSCodeCppConfig/" class="archive-article-date">
+  	<time datetime="2020-04-21T15:28:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-21</time>
+</a>
+
+        <!-- 开始添加字数统计-->
+        
+          <div style="margin-top:10px;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">949字</span>
+      </span>
+    </span>
+
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">  阅读时长: </span>
+        <span class="post-count">3分</span>
+      </span>
+    </span>
+</div>
           
+        <!-- 添加完成 -->
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>VSCode本身是一个文本编辑器,VSCode中开发C++本质上是通过调用编译器的命令来编译和生成可执行文件,但是VSCode可以通过配置相应的配置文件来简化操作,一键调用配置好的命令,从而提高效率.</p>
+<a id="more"></a>
+
+<h2 id="g-clang"><a href="#g-clang" class="headerlink" title="g++/clang++"></a>g++/clang++</h2><p>在配置之前需要知道,g++是c++的编译器,我的Mac上因为安装了Xcode所以已经被安装了,如果系统上没有需要手动安装<br>另:clang++也是一种c++编译器</p>
+<p>在安装完c++编译器之后,就可以通过命令行调用它来编译C++项目了,但是这样显然不太方便,这就需要vscode了</p>
+<h2 id="vscode配置"><a href="#vscode配置" class="headerlink" title="vscode配置"></a>vscode配置</h2><p><strong>C/C++插件</strong><br>在vscode的插件一栏搜索<code>C++</code>,找到作者为Microsoft的那一个插件并安装,一般是第一个<code>C/C++</code><br>这个插件的作用是什么呢,目前我知道的是,代码提示,代码跳转,调试</p>
+<p><strong>新建项目</strong><br>新建一个文件夹,这里新建几个cpp文件,随便写点什么,例如:<br><strong><code>Student.h</code></strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string&gt;</span></span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Student</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">Show</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">Set</span><span class="params">(<span class="keyword">int</span> age, <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; name)</span></span>;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">int</span> _age&#123; <span class="number">20</span> &#125;;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">string</span> _name;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><strong><code>Student.cpp</code></strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"student.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Student::Show</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; _name &lt;&lt; <span class="string">":"</span> &lt;&lt; _age &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Student::Set</span><span class="params">(<span class="keyword">int</span> age, <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span> &amp;name)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  _age = age;</span><br><span class="line">  _name = name;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong><code>main.cpp</code></strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"student.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argb)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">auto</span> stu = <span class="keyword">new</span> Student();</span><br><span class="line">  stu-&gt;Set(<span class="number">27</span>, <span class="string">"Jenocn"</span>);</span><br><span class="line">  stu-&gt;Show();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>编译配置</strong><br>项目创建之后,就需要编译了,在vscode下按<code>F1</code>或者<code>Ctrl/Cmd+Shift+P</code>,输入<code>Tasks: Configure Task</code>确定,然后如果有选项选择<code>c/c++:g++</code>那一项,这时会在<code>.vscode</code>目录下新建一个<code>tasks.json</code>文件,文件默认内容如下:</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"type"</span>: <span class="string">"shell"</span>, <span class="comment">// "shell"表示这个任务是一个shell命令</span></span><br><span class="line">  <span class="attr">"label"</span>: <span class="string">"C/C++: g++ build active file"</span>, <span class="comment">// 这个任务的名称</span></span><br><span class="line">  <span class="attr">"command"</span>: <span class="string">"/usr/bin/g++"</span>, <span class="comment">// g++编译器的可执行文件位置</span></span><br><span class="line">  <span class="attr">"args"</span>: [ <span class="comment">// g++命令后跟的参数</span></span><br><span class="line">    <span class="string">"-g"</span>, <span class="comment">// -g我的理解是省略一系列例如编译,汇编,链接等命令,直接生成机器码</span></span><br><span class="line">    <span class="string">"$&#123;file&#125;"</span>, <span class="comment">// 待编译的目标文件</span></span><br><span class="line">    <span class="string">"-o"</span>, <span class="comment">// 生成可执行文件到下面指定的文件中</span></span><br><span class="line">    <span class="string">"$&#123;fileDirname&#125;/$&#123;fileBasenameNoExtension&#125;"</span> <span class="comment">// 可执行文件名</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">"options"</span>: &#123;</span><br><span class="line">    <span class="attr">"cwd"</span>: <span class="string">"/usr/bin"</span> <span class="comment">// 默认的根目录</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"problemMatcher"</span>: [</span><br><span class="line">    <span class="string">"$gcc"</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">"group"</span>: <span class="string">"build"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们要修改其中的某些参数(仅列出修改的对象):</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"args"</span>: [</span><br><span class="line">    <span class="string">"-g"</span>,</span><br><span class="line">    <span class="string">"-std=c++17"</span>, <span class="comment">// 增加这行,表示支持c++17</span></span><br><span class="line">    <span class="comment">// "$&#123;file&#125;", // 删除这行,这里的$&#123;file&#125;表示当前打开的文件,我们不需要</span></span><br><span class="line">    <span class="string">"**/*.cpp"</span>, <span class="comment">// 增加这行,表示当前目录下的所有cpp文件都参与编译(可手动配置)</span></span><br><span class="line">    <span class="string">"-o"</span>,</span><br><span class="line">    <span class="string">"$&#123;workspaceRootFolderName&#125;"</span> <span class="comment">// 设置为项目文件夹名称</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">"options"</span>: &#123;</span><br><span class="line">    <span class="attr">"cwd"</span>: <span class="string">"$&#123;workspaceFolder&#125;"</span> <span class="comment">// 修改为当前项目根目录</span></span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>只有当<code>options.cwd</code>设置为<code>${workspaceFolder}</code>时,<code>args</code>中的文件名则不用设置为绝对路径,这样比较方便</p>
+<p><strong>编译生成可执行文件</strong><br>上面的配置设置完毕之后,只要按<code>Ctrl/Cmd+Shift+B</code>执行任务之后,就会在当前目录下生成一个文件夹同名的可执行文件,直接运行就可以了</p>
+<p><strong>调试</strong><br>在vscode调试选项下点击创建<code>launch.json</code>,会弹出一个菜单项,选择<code>C++ (GDB/LLDB)</code>,会在<code>.vscode</code>目录下创建一个<code>launch.json</code>文件,内容如下:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">"configurations": [</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"name"</span>: <span class="string">"(lldb) 启动"</span>,</span><br><span class="line">    <span class="attr">"type"</span>: <span class="string">"cppdbg"</span>,</span><br><span class="line">    <span class="attr">"request"</span>: <span class="string">"launch"</span>,</span><br><span class="line">    <span class="comment">// "program": "输入程序名称，例如 $&#123;workspaceFolder&#125;/a.out", // 删除这行</span></span><br><span class="line">    <span class="attr">"program"</span>: <span class="string">"$&#123;workspaceFolder&#125;/$&#123;workspaceRootFolderName&#125;"</span>, <span class="comment">// 修改成这行,这个对象的含义是指定可执行文件</span></span><br><span class="line">    <span class="attr">"args"</span>: [],</span><br><span class="line">    <span class="attr">"stopAtEntry"</span>: <span class="literal">false</span>,</span><br><span class="line">    <span class="attr">"cwd"</span>: <span class="string">"$&#123;workspaceFolder&#125;"</span>,</span><br><span class="line">    <span class="attr">"environment"</span>: [],</span><br><span class="line">    <span class="attr">"externalConsole"</span>: <span class="literal">false</span>,</span><br><span class="line">    <span class="attr">"MIMode"</span>: <span class="string">"lldb"</span></span><br><span class="line">  &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>配置完成后,就可以按<code>F5</code>运行和调试了</p>
+<p>那么本篇就到这里了</p>
+
+      
+
+      <!-- 个人信息展示 -->
+      
+        <div>
+          <hr>
+          <p>Jenocn:
+            <br>
+            <i class="icon-github"></i> <a href="https://github.com/Jenocn" title="VSCode C++环境配置" target="_blank">https://github.com/Jenocn</a>
+            <br>
+            <i class="icon-link"></i> <a href="https://jenocn.github.io/2020/04/VSCodeCppConfig/" title="VSCode C++环境配置" target="_blank">https://jenocn.github.io/2020/04/VSCodeCppConfig/</a>
+            <br>
+            <i class="icon-mail"></i> <a href="mailto:544673717@qq.com">544673717@qq.com</a>
+          </p>
+        </div>
+      
+      <!-- 个人信息展示 -->
+
+      <!-- 添加版权声明 -->
+    
+    
+      <div class="declare" hidden="hidden"></div>
+    
+      <!-- 添加版权声明 -->
+
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -250,25 +327,147 @@
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Cocos</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">VSCode</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://jenocn.github.io/2020/04/VSCodeCppConfig/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2020/04/InputSystem/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">多对多绑定的手柄/键盘输入系统</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#g-clang"><span class="toc-number">1.</span> <span class="toc-text">g++&#x2F;clang++</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#vscode配置"><span class="toc-number">2.</span> <span class="toc-text">vscode配置</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
+    <div id="gitalk-container"></div>
+    <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+
+<script>
+var gitalk = new Gitalk({
+  clientID: '57aab86b845922a720cb',
+  clientSecret: '679b681db46944ba7f98aa9b136281b71d1b581b',
+  repo: 'jenocn.github.io',
+  owner: 'Jenocn',
+  admin: ['Jenocn'],
+  id: md5(window.location.pathname),
+  distractionFreeMode: false
+})
+
+gitalk.render('gitalk-container')
+</script>
+  
+
+  
 
 
           </div>
@@ -299,9 +498,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
