@@ -9,14 +9,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://jenocn.github.io">
-  <title>Archives: 2019/6 | Jenocn</title>
+  <title>C#中带out修饰的参数 | Jenocn</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Jenocn">
-<meta property="og:url" content="https://jenocn.github.io/archives/2019/06/index.html">
+  <meta name="description" content="这篇讲讲C#中out关键字的作用和需要注意的地方">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C#中带out修饰的参数">
+<meta property="og:url" content="https://jenocn.github.io/2020/06/CSharpOutParam/index.html">
 <meta property="og:site_name" content="Jenocn">
+<meta property="og:description" content="这篇讲讲C#中out关键字的作用和需要注意的地方">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-06-08T02:15:55.000Z">
+<meta property="article:modified_time" content="2020-06-08T03:28:07.793Z">
 <meta property="article:author" content="Jenocn">
+<meta property="article:tag" content="编程">
+<meta property="article:tag" content="C#">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
@@ -210,37 +216,93 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-CSharpOutParam" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      C#中带out修饰的参数
+    </h1>
   
+
+        
+        <a href="/2020/06/CSharpOutParam/" class="archive-article-date">
+  	<time datetime="2020-06-08T02:15:55.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-08</time>
+</a>
+
+        <!-- 开始添加字数统计-->
+        
+          <div style="margin-top:10px;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">581字</span>
+      </span>
+    </span>
+
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">  阅读时长: </span>
+        <span class="post-count">2分</span>
+      </span>
+    </span>
+</div>
+          
+        <!-- 添加完成 -->
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这篇讲讲C#中out关键字的作用和需要注意的地方</p>
+<a id="more"></a>
+
+<hr>
+<p><strong>out 关键字</strong><br>表示这个参数由函数来<strong>决定其值</strong>,类似一个返回值,一般应用在某个函数需要多个返回值的场景,例如常用的内置方法<code>TryGetValue&lt;TK, TV&gt;(TK key, out TV value)</code>  </p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> _valueDict = <span class="keyword">new</span> Dictionary&lt;<span class="keyword">int</span>, <span class="keyword">int</span>&gt;();</span><br><span class="line"><span class="keyword">int</span> <span class="keyword">value</span>;</span><br><span class="line"><span class="keyword">if</span> (_valueDict.TryGetValue(<span class="number">10</span>, <span class="keyword">out</span> <span class="keyword">value</span>)) &#123;</span><br><span class="line">  <span class="comment">// todo...</span></span><br><span class="line">  <span class="comment">// print(value);</span></span><br><span class="line">&#125;</span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">**注意**  </span><br><span class="line">划重点,<span class="keyword">out</span>的机制是由函数决定其值,所以在执行函数之前的赋值将无效,视为额外的代码开销,下面展示一段错误的书写方式:  </span><br><span class="line">```csharp</span><br><span class="line"><span class="keyword">var</span> _valueDict = <span class="keyword">new</span> Dictionary&lt;<span class="keyword">int</span>, <span class="keyword">int</span>&gt;();</span><br><span class="line"><span class="keyword">int</span> <span class="keyword">value</span> = <span class="number">-1</span>; <span class="comment">// 假设我希望默认值是-1</span></span><br><span class="line"><span class="keyword">if</span> (_valueDict.TryGetValue(<span class="number">10</span>, <span class="keyword">out</span> <span class="keyword">value</span>)) &#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// todo...</span></span><br><span class="line"><span class="comment">// value是多少呢?</span></span><br></pre></td></tr></table></figure>
+<p>根据out的特性,由函数内部决定其值,所以如果<code>TryGetValue</code>没有找到时,value并不等于之前的值,而是其他值,可能为0,但我更愿意理解为未定义的值,假设你的参数是一个class或者struct呢?假设是其他第三方库写的方法呢?这完全依赖于内部实现,所以最好的办法是:</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> _valueDict = <span class="keyword">new</span> Dictionary&lt;<span class="keyword">int</span>, <span class="keyword">int</span>&gt;();</span><br><span class="line"><span class="keyword">int</span> <span class="keyword">value</span>;</span><br><span class="line"><span class="keyword">if</span> (!_valueDict.TryGetValue(<span class="number">10</span>, <span class="keyword">out</span> <span class="keyword">value</span>)) &#123;</span><br><span class="line">  <span class="keyword">value</span> = <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于一个书写习惯良好的程序员来说,任何声明都应该赋初值,我也有这个习惯,所以上面的<code>int value;</code>显得非常不舒服,但在这里的确不建议赋初值,因为赋值没有意义且会增加额外的开销,所以C#提供了另一种写法,解决了这个问题,out后可跟声明符:   </p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> _valueDict = <span class="keyword">new</span> Dictionary&lt;<span class="keyword">int</span>, <span class="keyword">int</span>&gt;();</span><br><span class="line"><span class="keyword">if</span> (!_valueDict.TryGetValue(<span class="number">10</span>, <span class="keyword">out</span> <span class="keyword">var</span> <span class="keyword">value</span>)) &#123;</span><br><span class="line">  <span class="keyword">value</span> = <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>最后谈谈ref关键字</strong><br>其实out与ref的意义不同,但是同样作为参数修饰,可以放到一起谈谈,ref更像是通常意义上(C++中)的引用,它表示一个参数作为引用传递到函数内部,函数内部可以使用该值也可以对其进行赋值,当然也可以不赋值,所以在使用ref时,这个参数在函数调用之前的赋值是有效的,那么说到区别,out是强调这个值一定是会被赋值的,而ref则更通用一些.</p>
+
+      
+
+      <!-- 个人信息展示 -->
+      
+        <div>
+          <hr>
+          <p>Jenocn:
+            <br>
+            <i class="icon-github"></i> <a href="https://github.com/Jenocn" title="C#中带out修饰的参数" target="_blank">https://github.com/Jenocn</a>
+            <br>
+            <i class="icon-link"></i> <a href="https://jenocn.github.io/2020/06/CSharpOutParam/" title="C#中带out修饰的参数" target="_blank">https://jenocn.github.io/2020/06/CSharpOutParam/</a>
+            <br>
+            <i class="icon-mail"></i> <a href="mailto:544673717@qq.com">544673717@qq.com</a>
+          </p>
+        </div>
+      
+      <!-- 个人信息展示 -->
+
+      <!-- 添加版权声明 -->
     
     
+      <div class="declare" hidden="hidden"></div>
+    
+      <!-- 添加版权声明 -->
+
+
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/06/UnitySurfaceShader1/" class="archive-article-date">
-  	<time datetime="2019-06-17T02:16:25.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-06-17</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/06/UnitySurfaceShader1/">Unity表面着色器笔记(一)</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -250,115 +312,147 @@
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Unity</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Shader</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">C#</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://jenocn.github.io/2020/06/CSharpOutParam/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/06/UGUI-Image-Adapter/" class="archive-article-date">
-  	<time datetime="2019-06-03T04:01:21.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-06-03</time>
-</a>
 
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2020/04/VSCodeCppConfig/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">VSCode C++环境配置</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/06/UGUI-Image-Adapter/">UGUI动态创建Image保持宽高比和分辨率适配</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">编程</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Unity</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    目录不存在
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/06/WriteCommonCode/" class="archive-article-date">
-  	<time datetime="2019-06-02T13:48:18.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-06-02</time>
-</a>
+        
+    </div>
+</aside>
 
-        </div>
-    	 
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/06/WriteCommonCode/">代码书写(一)</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">编程</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技巧</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
   
 
-    
+  
+
+  
+    <div id="gitalk-container"></div>
+    <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+
+<script>
+var gitalk = new Gitalk({
+  clientID: '57aab86b845922a720cb',
+  clientSecret: '679b681db46944ba7f98aa9b136281b71d1b581b',
+  repo: 'jenocn.github.io',
+  owner: 'Jenocn',
+  admin: ['Jenocn'],
+  id: md5(window.location.pathname),
+  distractionFreeMode: false
+})
+
+gitalk.render('gitalk-container')
+</script>
+  
+
+  
 
 
           </div>
@@ -389,8 +483,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
