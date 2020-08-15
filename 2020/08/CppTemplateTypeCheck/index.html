@@ -9,14 +9,21 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://jenocn.github.io">
-  <title>Archives: 2019/4 | Jenocn</title>
+  <title>C++泛型编程之类型的静态与动态检查 | Jenocn</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Jenocn">
-<meta property="og:url" content="https://jenocn.github.io/archives/2019/04/index.html">
+  <meta name="description" content="著名C++大师Scott在&lt;&lt;Effective C++&gt;&gt;一书中说过,C++可以看成是一个语言联邦,由4部分组成,分别是C语言,面向对象,STL标准模板库和泛型(模板).由此可见泛型在C++中的地位.使用模板可以减少大量代码重复,可以使方法在使用上更加通用和舒适.但使用模板仍然不可避免会出现一些问题,比如我希望传入的参数必须是const char*而不能是std::str">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++泛型编程之类型的静态与动态检查">
+<meta property="og:url" content="https://jenocn.github.io/2020/08/CppTemplateTypeCheck/index.html">
 <meta property="og:site_name" content="Jenocn">
+<meta property="og:description" content="著名C++大师Scott在&lt;&lt;Effective C++&gt;&gt;一书中说过,C++可以看成是一个语言联邦,由4部分组成,分别是C语言,面向对象,STL标准模板库和泛型(模板).由此可见泛型在C++中的地位.使用模板可以减少大量代码重复,可以使方法在使用上更加通用和舒适.但使用模板仍然不可避免会出现一些问题,比如我希望传入的参数必须是const char*而不能是std::str">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-08-11T03:15:41.000Z">
+<meta property="article:modified_time" content="2020-08-15T01:27:22.701Z">
 <meta property="article:author" content="Jenocn">
+<meta property="article:tag" content="编程">
+<meta property="article:tag" content="技巧">
+<meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
@@ -210,37 +217,99 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-CppTemplateTypeCheck" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/Vue-Good/" class="archive-article-date">
-  	<time datetime="2019-04-30T03:17:47.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-30</time>
-</a>
-
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/Vue-Good/">Vue 超棒的!</a>
+    <h1 class="article-title" itemprop="name">
+      C++泛型编程之类型的静态与动态检查
     </h1>
   
 
-        <div class="article-info info-on-right">
+        
+        <a href="/2020/08/CppTemplateTypeCheck/" class="archive-article-date">
+  	<time datetime="2020-08-11T03:15:41.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-08-11</time>
+</a>
+
+        <!-- 开始添加字数统计-->
+        
+          <div style="margin-top:10px;">
+    <span class="post-time">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-keyboard-o"></i>
+        <span class="post-meta-item-text">  字数统计: </span>
+        <span class="post-count">815字</span>
+      </span>
+    </span>
+
+    <span class="post-time">
+      &nbsp; | &nbsp;
+      <span class="post-meta-item-icon">
+        <i class="fa fa-hourglass-half"></i>
+        <span class="post-meta-item-text">  阅读时长: </span>
+        <span class="post-count">3分</span>
+      </span>
+    </span>
+</div>
           
+        <!-- 添加完成 -->
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>著名C++大师Scott在<code>&lt;&lt;Effective C++&gt;&gt;</code>一书中说过,C++可以看成是一个语言联邦,由4部分组成,分别是C语言,面向对象,STL标准模板库和泛型(模板).由此可见泛型在C++中的地位.<br>使用模板可以减少大量代码重复,可以使方法在使用上更加通用和舒适.但使用模板仍然不可避免会出现一些问题,比如我希望传入的参数必须是const char*而不能是std::string时.所以本篇文章讲解如何实现模板类型检查.</p>
+<a id="more"></a>
+
+<h2 id="模板特化"><a href="#模板特化" class="headerlink" title="模板特化"></a>模板特化</h2><p>要想实现对类型的检查,这里就得用到模板特化.模板特化就是给模板特例,针对你指定的类型生成不同的代码.</p>
+<p>例如:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 模板方法</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">Equal</span><span class="params">(T a, T b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a == b;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 特化版本</span></span><br><span class="line"><span class="keyword">template</span> &lt;&gt;</span><br><span class="line"><span class="keyword">bool</span> Equal&lt;<span class="keyword">char</span>*&gt;(<span class="keyword">char</span>* a, <span class="keyword">char</span>* b) &#123;</span><br><span class="line">    <span class="keyword">return</span> (<span class="built_in">strcmp</span>(a, b) == <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Equal</code>方法用于判断两个值是否相等,但是对于C字符串时,我们不能直接使用<code>==</code>来判断,所以需要特化一个版本,当类型为char*的时候,就会调用这个特化版本.</p>
+<h2 id="静态检查"><a href="#静态检查" class="headerlink" title="静态检查"></a>静态检查</h2><p>静态检查就是在编译期间检查,若有问题则无法通过编译,并提示目标位置,一般原则是能在编译期间解决的问题则不应该放到运行时解决,所以最好是能够在编译期就阻止一切出错的可能.</p>
+<p>那么对于模板类型检查,也是可以放到编译期间来检查的,当传入的参数不符合要求时,则不能通过编译,下面以一个简单的例子来说明:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 一个模板类</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">CheckType</span> &#123;</span> &#125;;</span><br><span class="line"><span class="comment">// 特化一个int版本</span></span><br><span class="line"><span class="keyword">template</span> &lt;&gt;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">CheckType</span>&lt;int&gt; &#123;</span></span><br><span class="line">    <span class="keyword">enum</span> &#123; IsInt = <span class="number">1</span> &#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>针对上面的例子,就可以静态检查类型是否为<code>int</code>了,例如有一个模板,我们限制参数必须为int时,就可以这么用了:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Test</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static_assert</span>(CheckType&lt;T&gt;::IsInt, <span class="string">"The type isn't int"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当类型不为int时,因为根本没有<code>IsInt</code>这个值,因此就会报错,并打印信息,根据编译器的报错就可以轻松找到出错的位置了,那对于其他类型,就需要一一特化,这里就不详细写了</p>
+<h2 id="动态检查"><a href="#动态检查" class="headerlink" title="动态检查"></a>动态检查</h2><p>有时候,静态检查并不能满足需求,需要在运行时检查,代码如下:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T1, <span class="keyword">typename</span> T2&gt;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">CheckTypeSame</span> &#123;</span></span><br><span class="line">  <span class="keyword">enum</span> &#123; value = <span class="number">0</span> &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 特化版本</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">CheckTypeSame</span>&lt;T, T&gt; &#123;</span></span><br><span class="line">  <span class="keyword">enum</span> &#123; value = <span class="number">1</span> &#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>当两个类型不同时,会调用通用版本,因此<code>value</code>的值为0, 当类型相同时则会走特化版本,此时<code>value</code>值为1,所以通过判断<code>value</code>的值就可以确定两个类型是否一样了,调用方法如下:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这里用一个简单例子说明动态判断类型</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Print</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (CheckTypeSame&lt;T, <span class="keyword">int</span>&gt;::value) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"value is int"</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"value isn't int"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+
+      <!-- 个人信息展示 -->
+      
+        <div>
+          <hr>
+          <p>Jenocn:
+            <br>
+            <i class="icon-github"></i> <a href="https://github.com/Jenocn" title="C++泛型编程之类型的静态与动态检查" target="_blank">https://github.com/Jenocn</a>
+            <br>
+            <i class="icon-link"></i> <a href="https://jenocn.github.io/2020/08/CppTemplateTypeCheck/" title="C++泛型编程之类型的静态与动态检查" target="_blank">https://jenocn.github.io/2020/08/CppTemplateTypeCheck/</a>
+            <br>
+            <i class="icon-mail"></i> <a href="mailto:544673717@qq.com">544673717@qq.com</a>
+          </p>
+        </div>
+      
+      <!-- 个人信息展示 -->
+
+      <!-- 添加版权声明 -->
+    
+    
+      <div class="declare" hidden="hidden"></div>
+    
+      <!-- 添加版权声明 -->
+
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -250,119 +319,151 @@
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">前端</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/MessageCenter/" class="archive-article-date">
-  	<time datetime="2019-04-24T03:27:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-24</time>
-</a>
-
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/MessageCenter/">进阶版消息机制实现</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">编程</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技巧</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
         		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">设计模式</a>
-        		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://jenocn.github.io/2020/08/CppTemplateTypeCheck/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/Message-in-Code/" class="archive-article-date">
-  	<time datetime="2019-04-22T14:16:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-22</time>
-</a>
 
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2020/06/CSharpOutParam/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">C#中带out修饰的参数</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/Message-in-Code/">代码中的消息机制</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">编程</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">C++</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">设计模式</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#模板特化"><span class="toc-number">1.</span> <span class="toc-text">模板特化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#静态检查"><span class="toc-number">2.</span> <span class="toc-text">静态检查</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#动态检查"><span class="toc-number">3.</span> <span class="toc-text">动态检查</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
   
   
-    </div></section>
   
 
-    
+  
+
+  
+
+  
+    <div id="gitalk-container"></div>
+    <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+
+<script>
+var gitalk = new Gitalk({
+  clientID: '57aab86b845922a720cb',
+  clientSecret: '679b681db46944ba7f98aa9b136281b71d1b581b',
+  repo: 'jenocn.github.io',
+  owner: 'Jenocn',
+  admin: ['Jenocn'],
+  id: md5(window.location.pathname),
+  distractionFreeMode: false
+})
+
+gitalk.render('gitalk-container')
+</script>
+  
+
+  
 
 
           </div>
@@ -393,8 +494,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
