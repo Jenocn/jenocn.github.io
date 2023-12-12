@@ -1,0 +1,369 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>用C#写了个GameScript | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="因为想在项目中使用脚本,目前最常见的就是使用Lua,但是像XLua,NLua之类的太庞大了,多平台支持也很依赖官方给的lib库,自己编译对我来说真的很难,出了很多问题,搞不定,搞不定,放弃,因为在我的项目中使用脚本只是一小部分,比如剧情这部分.所以我只需要一个能够执行命令的脚本就已经满足我的需求,但是,有时候设计的时候,想的太多,写着写着就….."> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="用C#写了个GameScript"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> 用C#写了个GameScript</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>因为想在项目中使用脚本,目前最常见的就是使用Lua,但是像XLua,NLua之类的太庞大了,多平台支持也很依赖官方给的lib库,自己编译对我来说真的很难,出了很多问题,搞不定,搞不定,放弃,因为在我的项目中使用脚本只是一小部分,比如剧情这部分.所以我只需要一个能够执行命令的脚本就已经满足我的需求,但是,有时候设计的时候,想的太多,写着写着就…..</p>
+<span id="more"></span>
+
+<hr>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><ul>
+<li>函数式结构 </li>
+<li>基于.net开发,跨平台,支持Unity </li>
+<li>嵌入式,接入方便,简单易用</li>
+<li>类C语法</li>
+</ul>
+<h2 id="使用场合"><a href="#使用场合" class="headerlink" title="使用场合"></a>使用场合</h2><p>&emsp;&emsp;脚本不需要编译,被当做资源使用,所以优点是支持生产环境下修改,当某些内容需要频繁修改的时候,适合使用脚本,但是脚本的运行效率比较低,不适合高性能场合使用.<br>&emsp;&emsp;我觉得,脚本更适合需要大量内容生产的环境使用,因为需要频繁修改,使用脚本可以提高开发效率,减少工作流程,比如游戏开发中的剧情部分.<br>&emsp;&emsp;其实很多内容使用良好的结构+配置就已经可以做到很好的效果,不过使用脚本,更明显的优势是更容易的支持逻辑判断.  </p>
+<h2 id="函数式结构"><a href="#函数式结构" class="headerlink" title="函数式结构"></a>函数式结构</h2><p>任何被执行的代码片段都看作为一个函数调用,因此一个脚本文件为一个函数,函数内可以嵌套定义函数,一个函数可看作为一个空间作用域,子作用域可以调用父作用域中的方法和变量</p>
+<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><p>GameScript是动态类型,但本质上会根据值来动态确定类型</p>
+<ul>
+<li><code>null</code></li>
+<li><code>number</code></li>
+<li><code>string</code></li>
+<li><code>bool</code></li>
+</ul>
+<h2 id="脚本代码"><a href="#脚本代码" class="headerlink" title="脚本代码"></a>脚本代码</h2><pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">// 定义一个变量,变量必须要赋初值</span>
+<span class="token class-name"><span class="token keyword">var</span></span> value1 <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+<span class="token class-name"><span class="token keyword">var</span></span> value2 <span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">;</span>
+<span class="token class-name"><span class="token keyword">var</span></span> value3 <span class="token operator">=</span> <span class="token string">"HelloWorld"</span><span class="token punctuation">;</span>
+<span class="token class-name"><span class="token keyword">var</span></span> value4 <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+<span class="token class-name"><span class="token keyword">var</span></span> value5 <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 赋值</span>
+value1 <span class="token operator">=</span> <span class="token number">1234</span><span class="token punctuation">;</span>
+value1 <span class="token operator">=</span> <span class="token string">"string"</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 表达式 </span>
+<span class="token class-name"><span class="token keyword">var</span></span> num1 <span class="token operator">=</span> <span class="token number">100</span> <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token number">5</span> <span class="token operator">+</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token class-name"><span class="token keyword">var</span></span> num2 <span class="token operator">=</span> num1 <span class="token operator">/</span> <span class="token number">100</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 条件语句</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>num2 <span class="token operator">></span> <span class="token number">1000</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"1000"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>num2 <span class="token operator">></span> <span class="token number">100</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"100"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"no"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">// 循环语句</span>
+<span class="token class-name"><span class="token keyword">var</span></span> x <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">;</span>
+<span class="token keyword">while</span><span class="token punctuation">(</span>x <span class="token operator">></span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    x <span class="token operator">=</span> x <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">// 定义一个无参的函数</span>
+<span class="token function">Method0</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// print为内置方法</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"Hello World"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">// 带一个参数的函数</span>
+<span class="token function">Method1</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">// 函数的调用 </span>
+<span class="token function">Method0</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// print "Hello World"</span>
+<span class="token function">Method1</span><span class="token punctuation">(</span><span class="token string">"Hello Method1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">Method1</span><span class="token punctuation">(</span><span class="token number">100</span> <span class="token operator">*</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 带返回值的函数</span>
+<span class="token comment">// 如果不写return语句,则默认返回null</span>
+<span class="token function">Method2</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">// 实现一个返回最大数的函数</span>
+<span class="token function">Max</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> b<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>a <span class="token operator">>=</span> b<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> a<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">return</span> b<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">// 函数空间 </span>
+<span class="token function">SpaceMethod1</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">SpaceMethod2</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">SpaceMethod3</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">// ...</span>
+            <span class="token comment">// 可调用所有上层空间内的变量和方法</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="C-中"><a href="#C-中" class="headerlink" title="C#中"></a>C#中</h2><h3 id="注册C-方法"><a href="#注册C-方法" class="headerlink" title="注册C#方法"></a>注册C#方法</h3><pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">/// &lt;summary></span>
+<span class="token comment">/// 注册C#方法的方法 RegisterFunction</span>
+<span class="token comment">/// &lt;/summary></span>
+<span class="token comment">/// &lt;param name="name">方法名&lt;/param></span>
+<span class="token comment">/// &lt;param name="func">回调&lt;/param></span>
+<span class="token comment">/// &lt;result>注册成功则返回true&lt;/result></span>
+<span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token return-type class-name"><span class="token keyword">bool</span></span> <span class="token function">RegisterFunction</span><span class="token punctuation">(</span><span class="token class-name"><span class="token keyword">string</span></span> name<span class="token punctuation">,</span> <span class="token class-name">Func<span class="token punctuation">&lt;</span>List<span class="token punctuation">&lt;</span>VMValue<span class="token punctuation">></span><span class="token punctuation">,</span> VMValue<span class="token punctuation">></span></span> func<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">// 在C#中</span>
+<span class="token comment">// 例如注册一个求和方法 sum</span>
+gs<span class="token punctuation">.</span>VM<span class="token punctuation">.</span><span class="token function">RegisterFunction</span><span class="token punctuation">(</span><span class="token string">"sum"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token class-name">List<span class="token punctuation">&lt;</span>gs<span class="token punctuation">.</span>VMValue<span class="token punctuation">></span></span> tempArgs<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name"><span class="token keyword">double</span></span> ret <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">foreach</span> <span class="token punctuation">(</span><span class="token class-name"><span class="token keyword">var</span></span> num <span class="token keyword">in</span> tempArgs<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>num<span class="token punctuation">.</span><span class="token function">IsNumber</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            ret <span class="token operator">+=</span> num<span class="token punctuation">.</span><span class="token function">GetNumber</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token constructor-invocation class-name">gs<span class="token punctuation">.</span>VMValue</span><span class="token punctuation">(</span>ret<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">// 在 GameScript 脚本中就可以使用了</span>
+<span class="token class-name"><span class="token keyword">var</span></span> <span class="token keyword">value</span> <span class="token operator">=</span> <span class="token function">sum</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token number">30</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">print</span><span class="token punctuation">(</span><span class="token keyword">value</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<h3 id="调用脚本"><a href="#调用脚本" class="headerlink" title="调用脚本"></a>调用脚本</h3><p>新建一个文本文件,例如 main.gs</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">// C#代码中</span>
+<span class="token comment">// 读取脚本的全部内容</span>
+<span class="token class-name"><span class="token keyword">var</span></span> src <span class="token operator">=</span> File<span class="token punctuation">.</span><span class="token function">ReadAllText</span><span class="token punctuation">(</span><span class="token string">"main.gs"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// Load方法加载一个脚本,并返回此函数对象(一个脚本本身是一个函数)</span>
+<span class="token class-name">VMFunction</span> gsFunc <span class="token operator">=</span> gs<span class="token punctuation">.</span>VM<span class="token punctuation">.</span><span class="token function">Load</span><span class="token punctuation">(</span>src<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 执行</span>
+gsFunc<span class="token punctuation">.</span><span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h4 id="VMValue"><a href="#VMValue" class="headerlink" title="VMValue"></a>VMValue</h4><p><code>VMValue</code>是一个兼容的值类型,提供了一系列方法便于对脚本值和C#值之间的操作,通过<code>new VMValue(object)</code>可以创建对象.</p>
+<h4 id="VMFunction"><a href="#VMFunction" class="headerlink" title="VMFunction"></a>VMFunction</h4><p><code>VMFunction</code>表示一个脚本函数,提供在C#中对脚本中的函数调用,提供<code>GetFunction(name)</code>方法可以获取当前函数空间下的子函数</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>在C#工程或者Unity中都可以直接使用,感兴趣的可以下载玩玩,可能有人觉得是在做无用功,但是我觉得很有意义,而且我会在我自己的项目中使用,最主要的写这些东西让我找到了编程的乐趣.</p>
+<p>github: <a href="https://github.com/Jenocn/GameScript" target="_blank">https://github.com/Jenocn/GameScript</a></p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2019/08/WriteCpp/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2019/07/UnityUiModel/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2019-07-26 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/GameScript/">GameScript<span>1</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

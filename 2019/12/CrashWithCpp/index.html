@@ -1,0 +1,297 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>C++运行时崩溃问题汇总 | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="其实归结起来,崩溃问题就一种,那就是访问了无效的内存地址,体现在具体的代码上无非两种情况,数组越界和失效的指针,下面将细说这两种情况,并且如何避免."> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="C++运行时崩溃问题汇总"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> C++运行时崩溃问题汇总</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>其实归结起来,崩溃问题就一种,那就是访问了无效的内存地址,体现在具体的代码上无非两种情况,数组越界和失效的指针,下面将细说这两种情况,并且如何避免.</p>
+<span id="more"></span>
+
+<h2 id="数组越界"><a href="#数组越界" class="headerlink" title="数组越界"></a>数组越界</h2><h3 id="c数组"><a href="#c数组" class="headerlink" title="c数组"></a>c数组</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">T value[10];
+
+value[11]; &#x2F;&#x2F; crash<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p><strong>危险度:★★★★★</strong></p>
+<p><strong>描述:</strong><br>这种数组有比较好的性能,但往往不便于管理.<br><strong>建议:</strong><br>1.数组长度使用枚举,常量或者宏<br>2.封装一个获取数值的方法,例如<code>GetArrValue(int index)</code>,方法内判断<code>index &gt;= 0 &amp;&amp; index &lt; length</code></p>
+<h3 id="std-vector"><a href="#std-vector" class="headerlink" title="std::vector"></a>std::vector</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">std::vector&lt;T&gt; vec;
+
+vec[100]; &#x2F;&#x2F; crash when (100 &gt;&#x3D; vec.size())<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p><strong>危险度:★★★★☆</strong><br><strong>描述:</strong><br>c数组的替代品,大部分场合下使用,都可以忽略数组长度,但是还是有很多场合下会导致数组越界,因为它仍然可以通过下标去获取元素<br><strong>建议:</strong><br>在使用时依然要判断下标的范围,比如<code>index &gt;= 0 &amp;&amp; index &lt; vec.size()</code>,建议根据需要封装方法来获取元素</p>
+<h2 id="野指针"><a href="#野指针" class="headerlink" title="野指针"></a>野指针</h2><h3 id="未初始化指针"><a href="#未初始化指针" class="headerlink" title="未初始化指针"></a>未初始化指针</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">T* p;
+
+p-&gt;func(); &#x2F;&#x2F; crash
+if (p) &#123;
+  p-&gt;func(); &#x2F;&#x2F; crash too
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>危险度:★★★★★</strong><br><strong>描述:</strong><br>未初始化的指针指向未知的地址,而不是<code>nullptr</code>或者<code>0</code>,这样会使得你在做指针判空时失效<code>if(p)</code><br><strong>建议:</strong><br>养成初始化的好习惯,由于c++新特性,都不需要在构造函数的初始化列表中去初始化了,只需要<code>int* p&#123; nullptr &#125;</code>在声明时这样写一下就ok了,你还懒得写初始化吗?编程是一项严谨的事情.</p>
+<h3 id="内存被释放"><a href="#内存被释放" class="headerlink" title="内存被释放"></a>内存被释放</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">T* p &#x3D; new T();
+
+delete p;
+&#x2F;&#x2F; ...
+p-&gt;func(); &#x2F;&#x2F; crash
+if (p) &#123;
+  p-&gt;func(); &#x2F;&#x2F; crash too
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><strong>危险度:★★★★★</strong><br><strong>描述:</strong><br>因为指向的内存已经被释放,导致后面的调用失效,这种情况写的不好会非常难找,而且开发时往往还容易遇到很多<br><strong>建议:</strong><br>1.delete之后,一定要给指针赋值为空.</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">T* p &#x3D; new T();
+T* other &#x3D; p;
+delete p;
+p &#x3D; nullptr;
+
+&#x2F;&#x2F;...
+if (other) &#123;
+  other-&gt;func(); &#x2F;&#x2F; crash
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><strong>危险度:★★★★★</strong><br><strong>描述:</strong><br>多个指针指向同一个内存地址,某个地方被释放了,而其他指针不知道<br><strong>建议:</strong><br>1.封装的作用在这里就体现了,不要把成员指针给外面到处赋值,否则后果自负<br>2.养成良好的成对书写习惯和谁申请谁释放的准则.哪个模块申请的内存,哪个模块负责释放.<br>3.如果确实有多个指针的需求,delete之后,请一定记得将他们赋值为nullptr<br>4.使用智能指针</p>
+<h3 id="迭代器失效"><a href="#迭代器失效" class="headerlink" title="迭代器失效"></a>迭代器失效</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">std::vector&lt;int&gt; vec;
+vec.resize(10);
+auto ite &#x3D; vec.begin();
+while (ite !&#x3D; vec.end()) &#123;
+  if (condition) &#123;
+    vec.push_back(99);
+    std::cout &lt;&lt; *ite; &#x2F;&#x2F; crash		
+  &#125;
+  ++ite;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>危险度:★★★★☆</strong><br><strong>描述:</strong><br>迭代器失效本质上也是指向的内存区域发生变化,故而成为野指针,导致崩溃的问题<br><strong>建议:</strong><br>不要在遍历的时候去做插入和删除的事情</p>
+<h3 id="空指针"><a href="#空指针" class="headerlink" title="空指针"></a>空指针</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">T* p &#x3D; nullptr;
+p-&gt;func(); &#x2F;&#x2F; crash<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p><strong>危险度:★★☆☆☆</strong><br><strong>描述:</strong><br>没有指向任何地址,鉴于出错时往往比较好定位,所以危险度不算太高,但出错情况还是很多的<br><strong>建议:</strong><br>做好必要的指针判空,很多时候比如加载资源,使用第三方方法获取对象,查找对象等等的操作时,都需要对指针判空.</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后:"></a>最后:</h2><p>避免写出可能崩溃的代码,需要保持良好的代码书写和书写约束,保持高内聚低耦合,保持良好的封装,保持有效的安全判断</p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2020/01/UnitySurfaceShader6/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2019/12/MakeRuleTileByPython/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2019-12-27 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/技巧/">技巧<span>4</span></a></li> <li><a href="/tags/C/">C++<span>7</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

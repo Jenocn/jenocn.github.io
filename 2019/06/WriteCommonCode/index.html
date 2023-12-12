@@ -1,0 +1,352 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>多层if嵌套的优化 | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="在实际开发中,写了很多功能,也改了无数bug了,这次讲一讲代码书写方面的技巧.遇到就写一点,这次讲一讲如何写利于扩展的代码."> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="多层if嵌套的优化"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> 多层if嵌套的优化</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>在实际开发中,写了很多功能,也改了无数bug了,这次讲一讲代码书写方面的技巧.遇到就写一点,这次讲一讲如何写利于扩展的代码.</p>
+<span id="more"></span>
+
+<h3 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h3><p>有这样一个需求,有3个物品的掉落池,分别为普通池,稀有池,传说池,概率分别为100%, 20%, 1.5%,一般上概率为了便于修改,会写在配置中,故有如下配置</p>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token punctuation">&#123;</span>
+    <span class="token property">"normal_percent"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span>
+    <span class="token property">"rare_percent"</span><span class="token operator">:</span><span class="token number">0.2</span><span class="token punctuation">,</span>
+    <span class="token property">"legend_percent"</span><span class="token operator">:</span><span class="token number">0.015</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>然后需求中要求,先随机是否为传说池,不是则随机是否为稀有池,最后是普通池</p>
+<h3 id="直接编码"><a href="#直接编码" class="headerlink" title="直接编码"></a>直接编码</h3><pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">// 标记一个结果</span>
+<span class="token class-name"><span class="token keyword">int</span></span> ret <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token comment">// 获取传说池概率</span>
+<span class="token class-name"><span class="token keyword">var</span></span> legend <span class="token operator">=</span> Config<span class="token punctuation">.</span><span class="token function">GetFloat</span><span class="token punctuation">(</span><span class="token string">"legend_percent"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 随机工具判断是否命中概率</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>RandomTool<span class="token punctuation">.</span><span class="token function">HitWithPercent</span><span class="token punctuation">(</span>legend<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    ret <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 以下同上,根据逻辑逐次判断</span>
+    <span class="token class-name"><span class="token keyword">var</span></span> rare <span class="token operator">=</span> Config<span class="token punctuation">.</span><span class="token function">GetFloat</span><span class="token punctuation">(</span><span class="token string">"rare_percent"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>RandomTool<span class="token punctuation">.</span><span class="token function">HitWithPercent</span><span class="token punctuation">(</span>rare<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        ret <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name"><span class="token keyword">var</span></span> normal <span class="token operator">=</span> Config<span class="token punctuation">.</span><span class="token function">GetFloat</span><span class="token punctuation">(</span><span class="token string">"normal_percent"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>RandomTool<span class="token punctuation">.</span><span class="token function">HitWithPercent</span><span class="token punctuation">(</span>normal<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            ret <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>显然上面的书写方式不太利于扩展,假设需求变更,要在稀有和传说中间加一个史诗池,那么会怎样?</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token class-name"><span class="token keyword">int</span></span> ret <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token class-name"><span class="token keyword">var</span></span> legend <span class="token operator">=</span> Config<span class="token punctuation">.</span><span class="token function">GetFloat</span><span class="token punctuation">(</span><span class="token string">"legend_percent"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>RandomTool<span class="token punctuation">.</span><span class="token function">HitWithPercent</span><span class="token punctuation">(</span>legend<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    ret <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 要将史诗池的判断加在这里,然后后面的代码全部都要挪到else里面去</span>
+    <span class="token comment">// 而且嵌套层次越来越多</span>
+    <span class="token class-name"><span class="token keyword">var</span></span> epic <span class="token operator">=</span> Config<span class="token punctuation">.</span><span class="token function">GetFloat</span><span class="token punctuation">(</span><span class="token string">"epic_percent"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>RandomTool<span class="token punctuation">.</span><span class="token function">HitWithPercent</span><span class="token punctuation">(</span>rare<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        ret <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name"><span class="token keyword">var</span></span> rare <span class="token operator">=</span> Config<span class="token punctuation">.</span><span class="token function">GetFloat</span><span class="token punctuation">(</span><span class="token string">"rare_percent"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>RandomTool<span class="token punctuation">.</span><span class="token function">HitWithPercent</span><span class="token punctuation">(</span>rare<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            ret <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+            <span class="token class-name"><span class="token keyword">var</span></span> normal <span class="token operator">=</span> Config<span class="token punctuation">.</span><span class="token function">GetFloat</span><span class="token punctuation">(</span><span class="token string">"normal_percent"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>RandomTool<span class="token punctuation">.</span><span class="token function">HitWithPercent</span><span class="token punctuation">(</span>normal<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                ret <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3 id="换一种写法"><a href="#换一种写法" class="headerlink" title="换一种写法"></a>换一种写法</h3><p>下面将换一种方式书写,但并不是最优方式,而是一个小技巧,这个小技巧用的还蛮多的,但是这里有更好的方式,最后再讲.</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">// 利用do &#123;&#125; while(false)的方式,减少代码缩进,易于阅读,修改也更方便</span>
+<span class="token class-name"><span class="token keyword">int</span></span> ret <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token keyword">do</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 先判断传说的概率,满足了就break跳出循环,否则会继续后面的逻辑</span>
+    <span class="token class-name"><span class="token keyword">var</span></span> legend <span class="token operator">=</span> Config<span class="token punctuation">.</span><span class="token function">GetFloat</span><span class="token punctuation">(</span><span class="token string">"legend_percent"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>RandomTool<span class="token punctuation">.</span><span class="token function">HitWithPercent</span><span class="token punctuation">(</span>legend<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        ret <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
+        <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token class-name"><span class="token keyword">var</span></span> rare <span class="token operator">=</span> Config<span class="token punctuation">.</span><span class="token function">GetFloat</span><span class="token punctuation">(</span><span class="token string">"rare_percent"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>RandomTool<span class="token punctuation">.</span><span class="token function">HitWithPercent</span><span class="token punctuation">(</span>rare<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        ret <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token class-name"><span class="token keyword">var</span></span> normal <span class="token operator">=</span> Config<span class="token punctuation">.</span><span class="token function">GetFloat</span><span class="token punctuation">(</span><span class="token string">"normal_percent"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>RandomTool<span class="token punctuation">.</span><span class="token function">HitWithPercent</span><span class="token punctuation">(</span>normal<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        ret <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span> <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>像上面这样的书写,再加入一个史诗概率池进去,也不用改动其他部分的代码,而是在需要的位置,插入一段史诗的代码就可以了,非常简单的一个书写技巧,但是却使得后期维护和阅读都更加轻松.</p>
+<h5 id="这个技巧使用的地方有很多-像嵌套很多的代码-都可以通过这个方式减少嵌套-非常推荐掌握"><a href="#这个技巧使用的地方有很多-像嵌套很多的代码-都可以通过这个方式减少嵌套-非常推荐掌握" class="headerlink" title="这个技巧使用的地方有很多,像嵌套很多的代码,都可以通过这个方式减少嵌套,非常推荐掌握"></a>这个技巧使用的地方有很多,像嵌套很多的代码,都可以通过这个方式减少嵌套,非常推荐掌握</h5><h3 id="本例子更好的方式"><a href="#本例子更好的方式" class="headerlink" title="本例子更好的方式"></a>本例子更好的方式</h3><p>那么本例子其实还有一种更好的做法,当增加池的时候,甚至不需要改动随机部分的代码,只需要改动配置就达到需求了,主要是结合容器的使用</p>
+<p>首先是配置部分需要换一种方式写:</p>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token punctuation">&#123;</span>
+    <span class="token property">"drop_percent_0"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span>
+    <span class="token property">"drop_percent_1"</span><span class="token operator">:</span><span class="token number">0.2</span><span class="token punctuation">,</span>
+    <span class="token property">"drop_percent_2"</span><span class="token operator">:</span><span class="token number">0.015</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>将代码分为两个部分,初始化时载入所有概率到List中,其实也可以直接在处理随机的地方加载,但是这种数据是不会变的,所以可以放到这个类初始化的位置</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">// 存放概率配置的容器</span>
+<span class="token class-name">List<span class="token punctuation">&lt;</span><span class="token keyword">float</span><span class="token punctuation">></span></span> _percentList <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token constructor-invocation class-name">List<span class="token punctuation">&lt;</span><span class="token keyword">float</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 这里循环使用100表示上限支持最多100个池,也可以使用int max</span>
+<span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token class-name"><span class="token keyword">int</span></span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">100</span><span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// -1是默认值,当获取不到这个配置的时候,返回-1,则break跳出循环</span>
+    <span class="token class-name"><span class="token keyword">var</span></span> percent <span class="token operator">=</span> Config<span class="token punctuation">.</span><span class="token function">GetFloat</span><span class="token punctuation">(</span><span class="token string">"drop_percent_"</span> <span class="token operator">+</span> i<span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>percent <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token keyword">break</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+    _percentList<span class="token punctuation">.</span><span class="token function">Add</span><span class="token punctuation">(</span>percent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">// 随机部分代码</span>
+<span class="token comment">// 从列表尾端开始循环,逐个判断,命中概率后获得当前的index即为结果然后break循环</span>
+<span class="token class-name"><span class="token keyword">int</span></span> ret <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token class-name"><span class="token keyword">int</span></span> i <span class="token operator">=</span> _percentList<span class="token punctuation">.</span>Count <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token operator">--</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name"><span class="token keyword">var</span></span> percent <span class="token operator">=</span> _percentList<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>RandomTool<span class="token punctuation">.</span><span class="token function">HitWithPercent</span><span class="token punctuation">(</span>percent<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        ret <span class="token operator">=</span> i<span class="token punctuation">;</span>
+        <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>使用上面这种方法,无论是加池减池,都不用再改动代码了,这个技巧也可以用在很多其他地方</p>
+<p>本文就到这里了,以后当遇到合适的技巧,再继续写哈哈.</p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2019/06/UGUI-Image-Adapter/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2019/05/ParseRichTool/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2019-06-02 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/技巧/">技巧<span>4</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

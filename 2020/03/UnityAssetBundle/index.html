@@ -1,0 +1,329 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>Unity AssetBundle | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="总结一下Unity中的打包.
+
+打包
+使用
+扩展"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Unity AssetBundle"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> Unity AssetBundle</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>总结一下Unity中的打包.</p>
+<ul>
+<li>打包</li>
+<li>使用</li>
+<li>扩展</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="打包"><a href="#打包" class="headerlink" title="打包"></a>打包</h2><p>首先打包AssetBundle需要选择要打包的内容,然后使用打包方法打包.</p>
+<p><strong>第一步 选定打包的内容</strong><br>在资源目录内,选中要打包的文件夹或者文件,选择文件夹时,会包含文件夹内的所有内容,选中后,可以看到<code>Inspector</code>最下方有一个<code>Asset Labels</code>选项,点击后会出现<code>AssetBundle</code>选项,有两个下拉列表,前者选择包的文件名,后者选择后缀名</p>
+<p><img src="/step1_1.jpg" alt="step1">  </p>
+<p>已经设置过的名称会出现在列表中,如果需要新建则选择<code>New...</code>选项,手动输入名称  </p>
+<p><img src="/step1_2.jpg" alt="step1"></p>
+<p>名称支持目录形式,使用<code>/</code>方式分割,例如<code>audio/sound</code>表示将<code>sound</code>包放在<code>audio</code>文件夹下</p>
+<p>注意:一个AssetBundle包内的资源文件名不能相同,即使在不同路径下</p>
+<p><strong>第二步 打包方法调用</strong>  </p>
+<p>上一步配置好之后,此时需要调用打包的方法才会生效,打包方法在<code>UnityEditor</code>的命名空间内,所以这个方法在编辑器环境下使用,打包的方法是<code>BuildPipeline.BuildAssetBundles()</code>,此方法有3个参数,分别为<code>导出路径,导出选项,目标平台</code>,参数2一般设置为<code>None</code>,参数3根据发布的平台设置</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp">BuildPipeline<span class="token punctuation">.</span><span class="token function">BuildAssetBundles</span><span class="token punctuation">(</span><span class="token string">"AssetBundle"</span><span class="token punctuation">,</span> BuildAssetBundleOptions<span class="token punctuation">.</span>None<span class="token punctuation">,</span> BuildTarget<span class="token punctuation">.</span>StandaloneOSX<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>Unity支持对编辑器开发扩展应用,将这个方法放到菜单中,以便之后方便调用,在<code>Assets</code>目录下的<code>Editor</code>文件夹内新建<code>EditorBuildAssetBundle.cs</code>,代码如下:</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token keyword">using</span> <span class="token namespace">UnityEditor</span><span class="token punctuation">;</span>
+<span class="token keyword">using</span> <span class="token namespace">System<span class="token punctuation">.</span>IO</span><span class="token punctuation">;</span>
+
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">EditorBuildAssetBundle</span>
+<span class="token punctuation">&#123;</span>
+  <span class="token comment">// 在Assets菜单下新建Build AssetBundle菜单</span>
+    <span class="token punctuation">[</span><span class="token attribute"><span class="token class-name">MenuItem</span><span class="token attribute-arguments"><span class="token punctuation">(</span><span class="token string">"Assets/Build AssetBundle"</span><span class="token punctuation">)</span></span></span><span class="token punctuation">]</span>
+    <span class="token keyword">static</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">BuildAssets</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">&#123;</span>
+        <span class="token class-name"><span class="token keyword">string</span></span> dir <span class="token operator">=</span> <span class="token string">"AssetBundle"</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>Directory<span class="token punctuation">.</span><span class="token function">Exists</span><span class="token punctuation">(</span>dir<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">&#123;</span>
+            Directory<span class="token punctuation">.</span><span class="token function">CreateDirectory</span><span class="token punctuation">(</span>dir<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token comment">// 根据需要可以增加多个菜单选项来适应需求</span>
+        BuildPipeline<span class="token punctuation">.</span><span class="token function">BuildAssetBundles</span><span class="token punctuation">(</span>dir<span class="token punctuation">,</span> BuildAssetBundleOptions<span class="token punctuation">.</span>None<span class="token punctuation">,</span> BuildTarget<span class="token punctuation">.</span>StandaloneOSX<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>通过菜单<code>Assets-&gt;Build AssetBundle</code>,调用之后就会根据之前的配置将打包后的文件导出在<code>项目/AssetBundle/</code>下了,比如我设置的<code>bgm</code>资源</p>
+<p><img src="/step2_1.jpg" alt="step2"></p>
+<p>关于参数2:</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token keyword">using</span> <span class="token namespace">System</span><span class="token punctuation">;</span>
+
+<span class="token keyword">public</span> <span class="token keyword">enum</span> <span class="token class-name">BuildAssetBundleOptions</span>
+<span class="token punctuation">&#123;</span>
+  None <span class="token operator">=</span> <span class="token number">0x0</span><span class="token punctuation">,</span> <span class="token comment">// 不使用任何特殊选项</span>
+  UncompressedAssetBundle <span class="token operator">=</span> <span class="token number">0x1</span><span class="token punctuation">,</span> <span class="token comment">// 不压缩</span>
+  CollectDependencies <span class="token operator">=</span> <span class="token number">0x2</span><span class="token punctuation">,</span> <span class="token comment">// 包含所有依赖关系</span>
+  CompleteAssets <span class="token operator">=</span> <span class="token number">0x4</span><span class="token punctuation">,</span> <span class="token comment">// 强制包括整个资源</span>
+  DisableWriteTypeTree <span class="token operator">=</span> <span class="token number">0x8</span><span class="token punctuation">,</span> <span class="token comment">// 不包含类型信息</span>
+  DeterministicAssetBundle <span class="token operator">=</span> <span class="token number">0x10</span><span class="token punctuation">,</span> <span class="token comment">// 使用hash id构建</span>
+  ForceRebuildAssetBundle <span class="token operator">=</span> <span class="token number">0x20</span><span class="token punctuation">,</span> <span class="token comment">// 强制重新构建</span>
+  IgnoreTypeTreeChanges <span class="token operator">=</span> <span class="token number">0x40</span><span class="token punctuation">,</span> <span class="token comment">// 忽略TypeTree的变化</span>
+  AppendHashToAssetBundleName <span class="token operator">=</span> <span class="token number">0x80</span><span class="token punctuation">,</span> <span class="token comment">// 将hash附加到资源名称上</span>
+  ChunkBasedCompression <span class="token operator">=</span> <span class="token number">0x100</span><span class="token punctuation">,</span> <span class="token comment">// 使用lz4的格式压缩</span>
+  StrictMode <span class="token operator">=</span> <span class="token number">0x200</span><span class="token punctuation">,</span> <span class="token comment">// 使用严格模式构建</span>
+  DryRunBuild <span class="token operator">=</span> <span class="token number">0x400</span><span class="token punctuation">,</span> <span class="token comment">// 不实际构建资源</span>
+  DisableLoadAssetByFileName <span class="token operator">=</span> <span class="token number">0x1000</span><span class="token punctuation">,</span> <span class="token comment">// 不使用资源名称加载</span>
+  DisableLoadAssetByFileNameWithExtension <span class="token operator">=</span> <span class="token number">0x2000</span><span class="token punctuation">,</span> <span class="token comment">// 不使用带后缀的文件名加载</span>
+  AssetBundleStripUnityVersion <span class="token operator">=</span> <span class="token number">0x8000</span> <span class="token comment">// 构建期间删除Unity版本号</span>
+<span class="token punctuation">&#125;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>以上参数的具体详细解释请参照Unity官网API的<a target="_blank" rel="noopener" href="https://docs.unity3d.com/ScriptReference/BuildAssetBundleOptions.html">BuildAssetBundleOptions页面</a>说明</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>使用<code>AssetBundle</code>类来加载和获取资源</p>
+<p><strong>使用Load系列方法加载资源</strong></p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">// 通过文件名路径加载</span>
+AssetBundle<span class="token punctuation">.</span><span class="token function">LoadFromFile</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 通过数据流加载</span>
+AssetBundle<span class="token punctuation">.</span><span class="token function">LoadFromStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 通过内存数据加载</span>
+AssetBundle<span class="token punctuation">.</span><span class="token function">LoadFromMemory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>因为资源包会根据不同的需求放在不同的位置,这里的<code>AssetBundle</code>文件夹位于项目根目录下,并且在Unity编辑器环境下可以直接通过文件相对路径加载,故通过以下方法加载:</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token class-name"><span class="token keyword">var</span></span> assetBundle <span class="token operator">=</span> AssetBundle<span class="token punctuation">.</span><span class="token function">LoadFromFile</span><span class="token punctuation">(</span><span class="token string">"AssetBundle/bgm"</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>对于获取到的<code>assetBundle</code>对象,里面包含了打包进去的文件,通过如下方法获取:</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token class-name"><span class="token keyword">var</span></span> bgmClip <span class="token operator">=</span> assetBundle<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">LoadAsset</span><span class="token generic class-name"><span class="token punctuation">&lt;</span>AudioClip<span class="token punctuation">></span></span></span><span class="token punctuation">(</span><span class="token string">"bgm"</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>注意:<br>不论之前资源在什么目录下的,这里获取资源都只使用文件名获取,这也是为什么之前打包时不能有相同文件名的原因</p>
+<h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><p>AssetBundle在使用时会面临一些问题</p>
+<p><strong>开发环境和最终发布区分</strong><br>开发时,在得到资源后,每次都要打包一下再使用,确实是不利于效率的,很多资源都是需要频繁修改的,所以一般是在最终发布时打包,那么就需要一个管理类来负责这个事情,拿到的资源直接放在指定的目录下,通过对<code>Application.platform</code>的判断来决定使用何种方式读取资源.</p>
+<p><strong>依赖关系</strong><br>比如有a,b两个包,b中的某个资源依赖于a包中的某个资源,如果使用资源时,只加载b而没有加载a的情况下,b中这个资源则会出问题,需要确保a包也加载,解决这种问题,需要从两个方面下手,一方面是项目资源结构上,需要做到良好区分功能,我的观点是通过功能划分资源,这样一个包则包含这个功能的所有文件,就不需要去加载其他包中的内容了. 另一方面是根据资源的通用程度,划分出通用资源,保持一直存在. 复杂的情况下可以写一个资源层级目录,根据目录,在管理器中判断是否已经加载,没有则层层往上,直到依赖项全部加载为止.</p>
+<p><strong>最后</strong><br>那么本文就结束了,以上想法都是我的心得和浅见,希望能够帮助到大家.</p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2020/04/InputSystem/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2020/01/UnitySurfaceShader6/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2020-03-11 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/Unity/">Unity<span>13</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

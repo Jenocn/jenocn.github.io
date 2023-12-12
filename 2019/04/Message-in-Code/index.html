@@ -1,0 +1,378 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>消息机制 | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="本文将从以下几点去讲解  
+
+介绍消息机制
+缺点和优点
+推荐一些使用场合
+实现一个轻量版本的消息机制(C++)
+附源码"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="消息机制"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> 消息机制</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>本文将从以下几点去讲解  </p>
+<ul>
+<li>介绍消息机制</li>
+<li>缺点和优点</li>
+<li>推荐一些使用场合</li>
+<li>实现一个轻量版本的消息机制(C++)</li>
+<li>附源码</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="介绍消息机制"><a href="#介绍消息机制" class="headerlink" title="介绍消息机制"></a>介绍消息机制</h2><p>开门见山,消息机制,就是处理代码之间的通信问题.当一个模块需要调用另一个模块时,就可以使用消息机制,发送一个消息,告诉另一个模块,该工作了.消息机制的使用非常广泛,很多地方都有使用  </p>
+<h2 id="缺点和优点"><a href="#缺点和优点" class="headerlink" title="缺点和优点"></a>缺点和优点</h2><p><strong>缺点</strong>  </p>
+<ul>
+<li>不太容易掌握使用的时机  </li>
+<li>代码中会定义很多消息,都需要管理  </li>
+<li>可能会出现消息循环调用导致的问题</li>
+</ul>
+<p><strong>优点</strong>  </p>
+<ul>
+<li>降低耦合  </li>
+<li>从而提高代码安全性  </li>
+<li>提高代码的可维护性  </li>
+<li>有利于后续代码的迭代.</li>
+</ul>
+<h2 id="推荐一些使用场合"><a href="#推荐一些使用场合" class="headerlink" title="推荐一些使用场合"></a>推荐一些使用场合</h2><ul>
+<li>最经典的使用场合就是数据层向UI层发送消息,即当数据发生变化时,通知UI更新显示  </li>
+<li>游戏开发中,对象与对象之间的调用,你是否有时候因为获取游戏对象而感到繁琐和麻烦,使用消息机制,发个消息,它自己做  </li>
+<li>游戏中类似成就的功能需要根据多个模块的功能来判断是否达成,这就造成了成就功能与多个模块产生依赖,使用消息机制是再好不过了</li>
+</ul>
+<p>可以使用消息机制的地方还有很多,那么在什么情况下使用消息机制合适呢?<br><code>当你需要调用另一个模块的功能时,另一个模块不一定会存在的情况下或者你无法优雅的获取对方的实例时</code>,就是使用消息机制最佳的场合.总之消息机制主要解决的就是耦合的问题,两个不想关的模块之间需要互相调用也都可以使用  </p>
+<h2 id="实现一个轻量版本的消息机制-C"><a href="#实现一个轻量版本的消息机制-C" class="headerlink" title="实现一个轻量版本的消息机制(C++)"></a>实现一个轻量版本的消息机制(C++)</h2><p>这里先实现一个轻量的版本,主要是通俗易懂,且可以直接使用,后面再写一篇进阶版本 <em><strong>(进阶版本带强类型消息,自动定义消息ID,按需派发消息,消息队列,内存管理等)</strong></em>  </p>
+<p>轻量版本,需要一个消息类,一个消息管理类  </p>
+<h5 id="消息基类"><a href="#消息基类" class="headerlink" title="消息基类"></a>消息基类</h5><pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">class MessageBase
+&#123;
+public:
+    virtual ~MessageBase() &#123;&#125;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h5 id="管理消息的中枢系统-负责消息的派发以及管理监听消息的监听者-一般情况下-这个类作为单例比较合适-单例本身就是全局对象-所以直接使用static方法"><a href="#管理消息的中枢系统-负责消息的派发以及管理监听消息的监听者-一般情况下-这个类作为单例比较合适-单例本身就是全局对象-所以直接使用static方法" class="headerlink" title="管理消息的中枢系统,负责消息的派发以及管理监听消息的监听者,一般情况下,这个类作为单例比较合适(单例本身就是全局对象,所以直接使用static方法)"></a>管理消息的中枢系统,负责消息的派发以及管理监听消息的监听者,一般情况下,这个类作为单例比较合适(单例本身就是全局对象,所以直接使用static方法)</h5><pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; MessageCenter.h
+&#x2F;&#x2F; 消息中枢用于派发消息和管理监听者
+class MessageCenter
+&#123;
+public:
+    &#x2F;**
+    * 添加监听者
+    * 参数1:监听者的名字,用来定位这个监听者
+    * 参数2:收到消息时触发的回调函数
+    *&#x2F;
+    static void AddListener(const std::string&amp; name, std::function&lt;void(int messageID, MessageBase* message)&gt; func);
+    &#x2F;**
+    * 删除监听者
+    * 参数:通过name删除已存在的监听者
+    *&#x2F;
+    static void RemoveListener(const std::string&amp; name);
+    &#x2F;**
+    * 发送消息
+    * 参数1:给这个消息指定一个ID
+    * 参数2:具体的消息
+    *&#x2F;
+    static void Send(int messageID, MessageBase* message);
+private:
+    &#x2F;**
+    存放所有的监听者
+    *&#x2F;
+    static std::map&lt;std::string, std::function&lt;void(int messageID, MessageBase*)&gt;&gt; _listenerMap;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; MessageCenter.cpp
+void MessageCenter::AddListener(const std::string&amp; name, std::function&lt;void(int, MessageBase*)&gt; func)
+&#123;
+    &#x2F;&#x2F; 确保参数的可靠性
+    if (func &#x3D;&#x3D; nullptr) &#123; return; &#125;
+    auto ite &#x3D; _listenerMap.find(name);
+    if (ite !&#x3D; _listenerMap.end()) &#123; return; &#125;
+    _listenerMap.emplace(name, func);
+&#125;
+void MessageCenter::RemoveListener(const std::string&amp; name)
+&#123;
+    auto ite &#x3D; _listenerMap.find(name);
+    if (ite &#x3D;&#x3D; _listenerMap.end()) &#123; return; &#125;
+    _listenerMap.erase(ite);
+&#125;
+void MessageCenter::Send(int messageID, MessageBase* message)
+&#123;
+    &#x2F;&#x2F; 回调所有的监听者函数
+    for (auto&amp; pair : _listenerMap)
+    &#123;
+        pair.second(messageID, message);
+    &#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h4 id="具体调用的实例"><a href="#具体调用的实例" class="headerlink" title="具体调用的实例"></a>具体调用的实例</h4><pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; MessageDefine.h
+&#x2F;&#x2F; 消息ID
+enum class MessageID &#123;
+    None &#x3D; 0,
+    MyMessage,
+&#125;;
+&#x2F;&#x2F; 具体的消息类
+class MyMessage : public MessageBase
+&#123;
+public:
+    &#x2F;&#x2F; 一些参数
+    std::string param1;
+    int param2;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; 这里简单做一个测试,就将监听和派发放在main中处理了,实际上,监听和派发可以在任意处
+&#x2F;&#x2F; main.cpp
+void main()
+&#123;
+    &#x2F;&#x2F; 添加一个监听者
+    MessageCenter.AddListener(&quot;Listener&quot;, (int id, MessageBase* message) &#123;
+        if (id &#x3D;&#x3D; (int)MessageID.MyMessage)
+        &#123;
+            auto msg &#x3D; static_cast&lt;MyMessage*&gt;(message);
+            std::cout &lt;&lt; msg-&gt;param1 &lt;&lt; &quot;:&quot; &lt;&lt; msg-&gt;param2 &lt;&lt; std::endl;
+        &#125;
+    &#125;);
+
+    &#x2F;&#x2F; 发送消息
+    MyMessage msg;
+    msg.param1 &#x3D; &quot;Hello&quot;;
+    msg.param2 &#x3D; 1001;
+    MessageCenter.send(MessageID.MyMessage, &amp;msg);
+
+    &#x2F;&#x2F; 删除监听者
+    MessageCenter.RemoveListener(&quot;Listener&quot;);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="附源码"><a href="#附源码" class="headerlink" title="附源码"></a>附源码</h2><p>源码中模拟了一个经典使用场景(Data-View)<br>源码下载地址<br><a href="https://pan.baidu.com/s/1NeOo5VnNjwzw2atZ8pUBtA" target="_blank">https://pan.baidu.com/s/1NeOo5VnNjwzw2atZ8pUBtA</a><br>提取码：bfi8  </p>
+<p>这篇文章到这里就结束了,希望能够帮到大家,如有问题可以邮我,一起交流学习!  </p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2019/04/MessageCenter/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a type="button" class="btn btn-default disabled">下一页<i class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2019-04-22 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/C/">C++<span>7</span></a></li> <li><a href="/tags/设计模式/">设计模式<span>2</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

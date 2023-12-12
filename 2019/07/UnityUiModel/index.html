@@ -1,0 +1,425 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>简单的Unity UI框架 | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="这是一个非常非常Pure的UI框架,很适合小型项目,在我写的项目中,经过大量的UI开发,这个框架稳定,易用并满足需求.
+
+设计  
+UI生命周期  
+UiModel类  
+UiStack类  
+使用"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="简单的Unity UI框架"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> 简单的Unity UI框架</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>这是一个非常非常Pure的UI框架,很适合小型项目,在我写的项目中,经过大量的UI开发,这个框架稳定,易用并满足需求.</p>
+<ul>
+<li>设计  </li>
+<li>UI生命周期  </li>
+<li>UiModel类  </li>
+<li>UiStack类  </li>
+<li>使用</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="设计"><a href="#设计" class="headerlink" title="设计"></a>设计</h2><p>1.UI的打开和关闭需要统一接口,便于调试和管理<br>2.UI打开和关闭可能会有动画效果,关闭效果播完然后才删除<br>3.当打开新的UI后,下层UI可以得到通知,相应的,当关闭UI时,下层UI也会得到通知<br>4.UI本身是可以支持跳转到其他UI的,所以支持自身直接打开新的UI,或者关闭UI </p>
+<h2 id="UI生命周期"><a href="#UI生命周期" class="headerlink" title="UI生命周期"></a>UI生命周期</h2><img src="/2019/07/UnityUiModel/ui_model_life_cycle_graph.png" class="" title="LifeCircle">
+
+<p><strong><code>void OnCreate()</code></strong> push时立即调用,一般在此方法中获取自身组件,处理自身初始化状态等自身相关操作<br><strong><code>void OnOpen()</code></strong> 用于初始化,注册消息,添加监听等涉及到外部类的状态的操作<br><strong><code>void OnOpenAction()</code></strong> 发生在OnOpen之后,在此方法中写打开动画的代码<br><strong><code>void OnUpdate()</code></strong> 每帧调用<br><strong><code>void OnPause()</code></strong> 当有新的界面被Push时调用,当前界面失去焦点,此方法处理一些需要暂停的操作<br><strong><code>void OnResume()</code></strong> 当新的界面被Pop时调用,当前界面变为焦点,恢复刚刚暂停的操作<br><strong><code>float OnCloseAction()</code></strong> 自身被Pop时调用,用于执行关闭的动画,返回动画需要的时间,时间过后会删除自身<br><strong><code>void OnClose()</code></strong> 关闭界面,用于释放资源,注销消息,删除监听等操作<br><strong><code>void OnRelease()</code></strong> 被Destroy时调用  </p>
+<h2 id="UiModel类"><a href="#UiModel类" class="headerlink" title="UiModel类"></a>UiModel类</h2><p>约束生命周期的UI基类,具体的UI类去继承它,实现需要的生命周期方法  </p>
+<p>这个类中,将Unity自带的<code>Awake</code>,<code>Start</code>,<code>OnDestroy</code>,<code>Update</code>实现了,一方面是不希望子类再去实现这些方法(子类再实现这些方法会出现警告),另一方面将方法转发给对应的生命周期函数,这样也是便于管理 </p>
+<p>结合<code>UiStack</code>类,每个<code>UiModel</code>都会存在于一个<code>UiStack</code>类中,因此获取到对方的引用将有利于一些操作,当然不希望外部去使用,作为private对象<br>这样一来,可以提供<code>Close</code>方法和<code>PushUI</code>方法,这样可以让具体的子类UI无需再获取到<code>UiStack</code>就可以打开新的界面和关闭自身界面</p>
+<pre class="line-numbers language-CSharp" data-language="CSharp"><code class="language-CSharp">using UnityEngine;
+using UnityEngine.UI;
+
+[RequireComponent(typeof(RectTransform))]
+public class UiModel : MonoBehaviour &#123;
+
+    private UiStack _uiStack &#x3D; null;
+
+    protected void Awake() &#123;
+        OnCreate();
+    &#125;
+
+    protected void Start() &#123;
+        OnOpen();
+        OnOpenAction();
+    &#125;
+
+    protected void OnDestroy() &#123;
+        OnRelease();
+    &#125;
+
+    protected void Update() &#123;
+        OnUpdate();
+    &#125;
+
+    public UiModel PushUI(GameObject prefab) &#123;
+        if (!_uiStack) &#123; return null; &#125;
+        return _uiStack.Push(prefab);
+    &#125;
+
+    public T PushUI&lt;T&gt;(GameObject prefab) where T : UiModel &#123;
+        return PushUI(prefab) as T;
+    &#125;
+
+    public void Close() &#123;
+        if (_uiStack) &#123;
+            _uiStack.Pop();
+        &#125;
+    &#125;
+
+    public void _BindUiStack(UiStack uiStack) &#123;
+        _uiStack &#x3D; uiStack;
+    &#125;
+
+    &#x2F;&#x2F; &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; life circle &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+
+    public virtual void OnCreate() &#123; &#125;
+    public virtual void OnOpen() &#123; &#125;
+    public virtual void OnOpenAction() &#123; &#125;
+
+    public virtual void OnPause() &#123; &#125;
+    public virtual void OnResume() &#123; &#125;
+
+    public virtual void OnUpdate() &#123; &#125;
+    public virtual float OnCloseAction() &#123; return 0; &#125;
+    public virtual void OnClose() &#123; &#125;
+    public virtual void OnRelease() &#123; &#125;
+
+    &#x2F;&#x2F; &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; end &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="UiStack类"><a href="#UiStack类" class="headerlink" title="UiStack类"></a>UiStack类</h2><p>这是一个Ui栈,主要就是管理<code>UiModel</code><br>主要方法就是<code>Push</code>,<code>Pop</code></p>
+<p><code>UiModel Push(GameObject prefab)</code>传入一个事先制作好的UI Prefab,打开这个UI并返回<code>UiModel</code>对象<br><code>void Pop()</code>弹出当前焦点UI</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token keyword">using</span> <span class="token namespace">System<span class="token punctuation">.</span>Collections<span class="token punctuation">.</span>Generic</span><span class="token punctuation">;</span>
+<span class="token keyword">using</span> <span class="token namespace">UnityEngine</span><span class="token punctuation">;</span>
+<span class="token keyword">using</span> <span class="token namespace">UnityEngine<span class="token punctuation">.</span>UI</span><span class="token punctuation">;</span>
+
+<span class="token punctuation">[</span><span class="token attribute"><span class="token class-name">RequireComponent</span><span class="token attribute-arguments"><span class="token punctuation">(</span><span class="token keyword">typeof</span><span class="token punctuation">(</span><span class="token type-expression class-name">Canvas</span><span class="token punctuation">)</span><span class="token punctuation">)</span></span></span><span class="token punctuation">]</span>
+<span class="token punctuation">[</span><span class="token attribute"><span class="token class-name">RequireComponent</span><span class="token attribute-arguments"><span class="token punctuation">(</span><span class="token keyword">typeof</span><span class="token punctuation">(</span><span class="token type-expression class-name">CanvasScaler</span><span class="token punctuation">)</span><span class="token punctuation">)</span></span></span><span class="token punctuation">]</span>
+<span class="token punctuation">[</span><span class="token attribute"><span class="token class-name">RequireComponent</span><span class="token attribute-arguments"><span class="token punctuation">(</span><span class="token keyword">typeof</span><span class="token punctuation">(</span><span class="token type-expression class-name">CanvasGroup</span><span class="token punctuation">)</span><span class="token punctuation">)</span></span></span><span class="token punctuation">]</span>
+<span class="token punctuation">[</span><span class="token attribute"><span class="token class-name">RequireComponent</span><span class="token attribute-arguments"><span class="token punctuation">(</span><span class="token keyword">typeof</span><span class="token punctuation">(</span><span class="token type-expression class-name">GraphicRaycaster</span><span class="token punctuation">)</span><span class="token punctuation">)</span></span></span><span class="token punctuation">]</span>
+<span class="token punctuation">[</span><span class="token attribute"><span class="token class-name">RequireComponent</span><span class="token attribute-arguments"><span class="token punctuation">(</span><span class="token keyword">typeof</span><span class="token punctuation">(</span><span class="token type-expression class-name">RectTransform</span><span class="token punctuation">)</span><span class="token punctuation">)</span></span></span><span class="token punctuation">]</span>
+<span class="token keyword">public</span> <span class="token keyword">sealed</span> <span class="token keyword">class</span> <span class="token class-name">UiStack</span> <span class="token punctuation">:</span> <span class="token type-list"><span class="token class-name">MonoBehaviour</span></span> <span class="token punctuation">&#123;</span>
+
+    <span class="token keyword">private</span> <span class="token class-name">RectTransform</span> _rectTransform <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">LinkedList<span class="token punctuation">&lt;</span>UiModel<span class="token punctuation">></span></span> _uiStack <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token constructor-invocation class-name">LinkedList<span class="token punctuation">&lt;</span>UiModel<span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token return-type class-name">Canvas</span> canvas <span class="token punctuation">&#123;</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">private</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">private</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">Awake</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        _rectTransform <span class="token operator">=</span> <span class="token generic-method"><span class="token function">GetComponent</span><span class="token generic class-name"><span class="token punctuation">&lt;</span>RectTransform<span class="token punctuation">></span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        canvas <span class="token operator">=</span> <span class="token generic-method"><span class="token function">GetComponent</span><span class="token generic class-name"><span class="token punctuation">&lt;</span>Canvas<span class="token punctuation">></span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">private</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">OnDestroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">Clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">public</span> <span class="token return-type class-name">UiModel</span> <span class="token function">Push</span><span class="token punctuation">(</span><span class="token class-name">GameObject</span> prefab<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>prefab<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            Debug<span class="token punctuation">.</span><span class="token function">LogError</span><span class="token punctuation">(</span><span class="token string">"The prefab is null!"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>prefab<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">GetComponent</span><span class="token generic class-name"><span class="token punctuation">&lt;</span>UiModel<span class="token punctuation">></span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            Debug<span class="token punctuation">.</span><span class="token function">LogError</span><span class="token punctuation">(</span><span class="token string">"It's not a UiModel object!"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+
+        <span class="token class-name"><span class="token keyword">var</span></span> last <span class="token operator">=</span> <span class="token punctuation">(</span>_uiStack<span class="token punctuation">.</span>Last <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">?</span> _uiStack<span class="token punctuation">.</span>Last<span class="token punctuation">.</span>Value <span class="token punctuation">:</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>last<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            last<span class="token punctuation">.</span><span class="token function">OnPause</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+
+        <span class="token class-name"><span class="token keyword">var</span></span> model <span class="token operator">=</span> <span class="token function">_InstantiateModel</span><span class="token punctuation">(</span>prefab<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        _uiStack<span class="token punctuation">.</span><span class="token function">AddLast</span><span class="token punctuation">(</span>model<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        model<span class="token punctuation">.</span><span class="token function">_BindUiStack</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> model<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">public</span> <span class="token return-type class-name">T</span> <span class="token generic-method"><span class="token function">Push</span><span class="token generic class-name"><span class="token punctuation">&lt;</span>T<span class="token punctuation">></span></span></span><span class="token punctuation">(</span><span class="token class-name">GameObject</span> prefab<span class="token punctuation">)</span> <span class="token keyword">where</span> <span class="token class-name">T</span> <span class="token punctuation">:</span> <span class="token type-list"><span class="token class-name">UiModel</span></span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token function">Push</span><span class="token punctuation">(</span>prefab<span class="token punctuation">)</span> <span class="token keyword">as</span> <span class="token class-name">T</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">public</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">Pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>_uiStack<span class="token punctuation">.</span>Last <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token keyword">return</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+        <span class="token class-name"><span class="token keyword">var</span></span> model <span class="token operator">=</span> _uiStack<span class="token punctuation">.</span>Last<span class="token punctuation">.</span>Value<span class="token punctuation">;</span>
+        _uiStack<span class="token punctuation">.</span><span class="token function">RemoveLast</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>model<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            model<span class="token punctuation">.</span><span class="token function">_BindUiStack</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name"><span class="token keyword">var</span></span> delay <span class="token operator">=</span> model<span class="token punctuation">.</span><span class="token function">OnCloseAction</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name"><span class="token keyword">var</span></span> last <span class="token operator">=</span> <span class="token punctuation">(</span>_uiStack<span class="token punctuation">.</span>Last <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">?</span> _uiStack<span class="token punctuation">.</span>Last<span class="token punctuation">.</span>Value <span class="token punctuation">:</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>last<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                last<span class="token punctuation">.</span><span class="token function">OnResume</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+            model<span class="token punctuation">.</span><span class="token function">OnClose</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token function">Destroy</span><span class="token punctuation">(</span>model<span class="token punctuation">.</span>gameObject<span class="token punctuation">,</span> delay<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">public</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">Clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">while</span> <span class="token punctuation">(</span>_uiStack<span class="token punctuation">.</span>Last <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token function">Pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">public</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">Pause</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name"><span class="token keyword">var</span></span> last <span class="token operator">=</span> <span class="token punctuation">(</span>_uiStack<span class="token punctuation">.</span>Last <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">?</span> _uiStack<span class="token punctuation">.</span>Last<span class="token punctuation">.</span>Value <span class="token punctuation">:</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>last<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            last<span class="token punctuation">.</span><span class="token function">OnPause</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">public</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">Resume</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name"><span class="token keyword">var</span></span> last <span class="token operator">=</span> <span class="token punctuation">(</span>_uiStack<span class="token punctuation">.</span>Last <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">?</span> _uiStack<span class="token punctuation">.</span>Last<span class="token punctuation">.</span>Value <span class="token punctuation">:</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>last<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            last<span class="token punctuation">.</span><span class="token function">OnResume</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token keyword">private</span> <span class="token return-type class-name">UiModel</span> <span class="token function">_InstantiateModel</span><span class="token punctuation">(</span><span class="token class-name">GameObject</span> prefab<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name"><span class="token keyword">var</span></span> modelObj <span class="token operator">=</span> <span class="token function">Instantiate</span><span class="token punctuation">(</span>prefab<span class="token punctuation">,</span> _rectTransform<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        modelObj<span class="token punctuation">.</span>name <span class="token operator">=</span> prefab<span class="token punctuation">.</span>name<span class="token punctuation">;</span>
+        <span class="token class-name"><span class="token keyword">var</span></span> modelTransform <span class="token operator">=</span> modelObj<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">GetComponent</span><span class="token generic class-name"><span class="token punctuation">&lt;</span>RectTransform<span class="token punctuation">></span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        modelTransform<span class="token punctuation">.</span>localScale <span class="token operator">=</span> Vector3<span class="token punctuation">.</span>one<span class="token punctuation">;</span>
+        modelTransform<span class="token punctuation">.</span>localPosition <span class="token operator">=</span> Vector3<span class="token punctuation">.</span>zero<span class="token punctuation">;</span>
+        <span class="token class-name"><span class="token keyword">var</span></span> model <span class="token operator">=</span> modelObj<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">GetComponent</span><span class="token generic class-name"><span class="token punctuation">&lt;</span>UiModel<span class="token punctuation">></span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> model<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2019/07/GameScriptIntroduce/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2019/06/UnitySurfaceShader1/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2019-07-23 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/Unity/">Unity<span>13</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

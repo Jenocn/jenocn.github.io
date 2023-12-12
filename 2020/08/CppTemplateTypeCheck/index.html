@@ -1,0 +1,295 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>C++泛型编程之类型的静态与动态检查 | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="著名C++大师Scott在&amp;lt;&amp;lt;Effective C++&amp;gt;&amp;gt;一书中说过,C++可以看成是一个语言联邦,由4部分组成,分别是C语言,面向对象,STL标准模板库和泛型(模板).由此可见泛型在C++中的地位.使用模板可以减少大量代码重复,可以使方法在使用上更加通用和舒适.但使用模板仍然不可避免会出现一些问题,比如我希望传入的参数必须是const char*而不能是std::string时.所以本篇文章讲解如何实现模板类型检查."> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="C++泛型编程之类型的静态与动态检查"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> C++泛型编程之类型的静态与动态检查</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>著名C++大师Scott在<code>&lt;&lt;Effective C++&gt;&gt;</code>一书中说过,C++可以看成是一个语言联邦,由4部分组成,分别是C语言,面向对象,STL标准模板库和泛型(模板).由此可见泛型在C++中的地位.<br>使用模板可以减少大量代码重复,可以使方法在使用上更加通用和舒适.但使用模板仍然不可避免会出现一些问题,比如我希望传入的参数必须是const char*而不能是std::string时.所以本篇文章讲解如何实现模板类型检查.</p>
+<span id="more"></span>
+
+<h2 id="模板特化"><a href="#模板特化" class="headerlink" title="模板特化"></a>模板特化</h2><p>要想实现对类型的检查,这里就得用到模板特化.模板特化就是给模板特例,针对你指定的类型生成不同的代码.</p>
+<p>例如:</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">&#x2F;&#x2F; 模板方法
+template &lt;typename T&gt;
+bool Equal(T a, T b) &#123;
+    return a &#x3D;&#x3D; b;
+&#125;
+&#x2F;&#x2F; 特化版本
+template &lt;&gt;
+bool Equal&lt;char*&gt;(char* a, char* b) &#123;
+    return (strcmp(a, b) &#x3D;&#x3D; 0);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><code>Equal</code>方法用于判断两个值是否相等,但是对于C字符串时,我们不能直接使用<code>==</code>来判断,所以需要特化一个版本,当类型为char*的时候,就会调用这个特化版本.</p>
+<h2 id="静态检查"><a href="#静态检查" class="headerlink" title="静态检查"></a>静态检查</h2><p>静态检查就是在编译期间检查,若有问题则无法通过编译,并提示目标位置,一般原则是能在编译期间解决的问题则不应该放到运行时解决,所以最好是能够在编译期就阻止一切出错的可能.</p>
+<p>那么对于模板类型检查,也是可以放到编译期间来检查的,当传入的参数不符合要求时,则不能通过编译,下面以一个简单的例子来说明:</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">&#x2F;&#x2F; 一个模板类
+template &lt;typename T&gt;
+struct CheckType &#123; &#125;;
+&#x2F;&#x2F; 特化一个int版本
+template &lt;&gt;
+struct CheckType&lt;int&gt; &#123;
+    enum &#123; IsInt &#x3D; 1 &#125;;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>针对上面的例子,就可以静态检查类型是否为<code>int</code>了,例如有一个模板,我们限制参数必须为int时,就可以这么用了:</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T&gt;
+void Test(T value) &#123;
+    static_assert(CheckType&lt;T&gt;::IsInt, &quot;The type isn&#39;t int&quot;);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>当类型不为int时,因为根本没有<code>IsInt</code>这个值,因此就会报错,并打印信息,根据编译器的报错就可以轻松找到出错的位置了,那对于其他类型,就需要一一特化,这里就不详细写了</p>
+<h2 id="动态检查"><a href="#动态检查" class="headerlink" title="动态检查"></a>动态检查</h2><p>有时候,静态检查并不能满足需求,需要在运行时检查,代码如下:</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">template &lt;typename T1, typename T2&gt;
+struct CheckTypeSame &#123;
+  enum &#123; value &#x3D; 0 &#125;;
+&#125;;
+&#x2F;&#x2F; 特化版本
+template &lt;typename T&gt;
+struct CheckTypeSame&lt;T, T&gt; &#123;
+  enum &#123; value &#x3D; 1 &#125;;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>当两个类型不同时,会调用通用版本,因此<code>value</code>的值为0, 当类型相同时则会走特化版本,此时<code>value</code>值为1,所以通过判断<code>value</code>的值就可以确定两个类型是否一样了,调用方法如下:</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">&#x2F;&#x2F; 这里用一个简单例子说明动态判断类型
+template &lt;typename T&gt;
+void Print(T value) &#123;
+    if (CheckTypeSame&lt;T, int&gt;::value) &#123;
+        printf(&quot;value is int&quot;);
+    &#125; else &#123;
+        printf(&quot;value isn&#39;t int&quot;);
+    &#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2021/10/CSharpQuestionMarkInUnity/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2020/06/CSharpOutParam/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2020-08-11 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/技巧/">技巧<span>4</span></a></li> <li><a href="/tags/C/">C++<span>7</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

@@ -1,0 +1,360 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>Unity表面着色器笔记(五) - 描边效果 | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="周末在家玩游戏,然后看到怪物霸体的描边效果,描边在游戏中是很常用的,所以想自己实现一个,思考了一下,想到一个非常简单的方法"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Unity表面着色器笔记(五) - 描边效果"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> Unity表面着色器笔记(五) - 描边效果</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>周末在家玩游戏,然后看到怪物霸体的描边效果,描边在游戏中是很常用的,所以想自己实现一个,思考了一下,想到一个非常简单的方法</p>
+<span id="more"></span>
+
+<hr>
+<p>上一篇:<a href="https://jenocn.github.io/2019/09/UnitySurfaceShader4/">Unity表面着色器笔记(四)</a></p>
+<hr>
+<p>效果展示:</p>
+<p><img src="/shader_img2.jpg" alt="display"></p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>描边也有很多实现方法吧,我的办法是,检测一个透明像素的周围是否有非透明像素,如果有,则将当前透明像素填充为描边颜色</p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>还是封装一个方法比较简洁</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">/**
+参数:
+  tex:纹理
+  uv:纹理取值坐标
+  color:描边颜色
+  width:描边宽度
+  precision:精确度(透明度检测基准,小于该值则判定为可描边的区域)
+返回值:
+  最终颜色
+*/</span>
+<span class="token return-type class-name">fixed4</span> <span class="token function">GetOutlineColor</span><span class="token punctuation">(</span><span class="token class-name">sampler2D</span> tex<span class="token punctuation">,</span> <span class="token class-name">float2</span> uv<span class="token punctuation">,</span> <span class="token class-name">fixed4</span> color<span class="token punctuation">,</span> <span class="token keyword">fixed</span> width<span class="token punctuation">,</span> <span class="token keyword">fixed</span> precision<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token comment">// 首先获取原本的颜色,并判定是否是有效颜色</span>
+  <span class="token comment">// 有效颜色则表示非描边区域,直接返回该位置的颜色</span>
+  <span class="token class-name">fixed4</span> origin <span class="token operator">=</span> <span class="token function">tex2D</span><span class="token punctuation">(</span>tex<span class="token punctuation">,</span> uv<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>origin<span class="token punctuation">.</span>a <span class="token operator">></span> precision<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> origin<span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+  <span class="token comment">// 描边区域检测</span>
+  <span class="token comment">// 中心点周围3x3的九宫格区域</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">fixed</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">3</span><span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">fixed</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> <span class="token number">3</span><span class="token punctuation">;</span> <span class="token operator">++</span>j<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+      <span class="token comment">// 获取当前位置的实际纹理坐标</span>
+      <span class="token comment">// width位置的纹理</span>
+      <span class="token class-name">float2</span> tempUV <span class="token operator">=</span> uv <span class="token operator">+</span> <span class="token function">float2</span><span class="token punctuation">(</span>i <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> j <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">*</span> width<span class="token punctuation">;</span>
+      <span class="token comment">// 获取颜色,并判断颜色是否有效</span>
+      <span class="token class-name">fixed4</span> c <span class="token operator">=</span> <span class="token function">tex2D</span><span class="token punctuation">(</span>tex<span class="token punctuation">,</span> tempUV<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token comment">// 如果颜色有效,说明uv这个位置需要描边,返回描边的颜色color</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>c<span class="token punctuation">.</span>a <span class="token operator">></span> precision<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> color<span class="token punctuation">;</span>
+      <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+  <span class="token punctuation">&#125;</span>
+  <span class="token comment">// 周围未找到有效颜色,返回原始颜色</span>
+  <span class="token keyword">return</span> origin<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>将描边的颜色,宽度,精准度提取出来,供外部设置  </p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp">Properties <span class="token punctuation">&#123;</span>
+  _MainTex <span class="token punctuation">(</span><span class="token string">"Main Texture"</span><span class="token punctuation">,</span> <span class="token number">2D</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token string">"white"</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
+  _Color <span class="token punctuation">(</span><span class="token string">"Color (颜色)"</span><span class="token punctuation">,</span> Color<span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token return-type class-name"><span class="token punctuation">(</span>1<span class="token punctuation">,</span> 1<span class="token punctuation">,</span> 1<span class="token punctuation">,</span> 1<span class="token punctuation">)</span></span>
+  _Width <span class="token punctuation">(</span><span class="token string">"Width (宽度)"</span><span class="token punctuation">,</span> <span class="token function">Range</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0.5</span>
+  _Precision <span class="token punctuation">(</span><span class="token string">"Precision (精确度)"</span><span class="token punctuation">,</span> <span class="token function">Range</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0.99</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0.5</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><img src="/shader_img1.jpg" alt="propteties"></p>
+<p>surf函数中</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">surf</span><span class="token punctuation">(</span><span class="token class-name">Input</span> IN<span class="token punctuation">,</span> inout <span class="token class-name">SurfaceOutputStandard</span> o<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token comment">// 调用即可</span>
+  <span class="token class-name">half4</span> c <span class="token operator">=</span> <span class="token function">GetOutlineColor</span><span class="token punctuation">(</span>_MainTex<span class="token punctuation">,</span> IN<span class="token punctuation">.</span>uv_MainTex<span class="token punctuation">,</span> _Color<span class="token punctuation">,</span> _Width <span class="token operator">*</span> <span class="token number">0.01</span><span class="token punctuation">,</span> _Precision<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  o<span class="token punctuation">.</span>Emission <span class="token operator">=</span> c<span class="token punctuation">.</span>rgb<span class="token punctuation">;</span>
+  o<span class="token punctuation">.</span>Alpha <span class="token operator">=</span> c<span class="token punctuation">.</span>a<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h2><pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp">Shader <span class="token string">"Custom/OutlineShader"</span> <span class="token punctuation">&#123;</span>
+  Properties <span class="token punctuation">&#123;</span>
+    _MainTex <span class="token punctuation">(</span><span class="token string">"Main Texture"</span><span class="token punctuation">,</span> <span class="token number">2D</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token string">"white"</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
+    _Color <span class="token punctuation">(</span><span class="token string">"Color (颜色)"</span><span class="token punctuation">,</span> Color<span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token return-type class-name"><span class="token punctuation">(</span>1<span class="token punctuation">,</span> 1<span class="token punctuation">,</span> 1<span class="token punctuation">,</span> 1<span class="token punctuation">)</span></span>
+    _Width <span class="token punctuation">(</span><span class="token string">"Width (宽度)"</span><span class="token punctuation">,</span> <span class="token function">Range</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0.5</span>
+    _Precision <span class="token punctuation">(</span><span class="token string">"Precision (精确度)"</span><span class="token punctuation">,</span> <span class="token function">Range</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0.99</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0.5</span>
+  <span class="token punctuation">&#125;</span>
+  SubShader <span class="token punctuation">&#123;</span>
+    CGPROGRAM
+
+    <span class="token preprocessor property">#<span class="token directive keyword">pragma</span> surface surf Lambert alpha</span>
+    <span class="token preprocessor property">#<span class="token directive keyword">pragma</span> target 3.0</span>
+
+    <span class="token class-name">sampler2D</span> _MainTex<span class="token punctuation">;</span>
+    <span class="token class-name">fixed4</span> _Color<span class="token punctuation">;</span>
+    <span class="token keyword">fixed</span> _Width<span class="token punctuation">;</span>
+    <span class="token keyword">fixed</span> _Precision<span class="token punctuation">;</span>
+
+    <span class="token keyword">struct</span> <span class="token class-name">Input</span> <span class="token punctuation">&#123;</span>
+      <span class="token class-name">float2</span> uv_MainTex<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+    <span class="token return-type class-name">fixed4</span> <span class="token function">GetOutlineColor</span><span class="token punctuation">(</span><span class="token class-name">sampler2D</span> tex<span class="token punctuation">,</span> <span class="token class-name">float2</span> uv<span class="token punctuation">,</span> <span class="token class-name">fixed4</span> color<span class="token punctuation">,</span> <span class="token keyword">fixed</span> width<span class="token punctuation">,</span> <span class="token keyword">fixed</span> precision<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+
+      <span class="token class-name">fixed4</span> origin <span class="token operator">=</span> <span class="token function">tex2D</span><span class="token punctuation">(</span>tex<span class="token punctuation">,</span> uv<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>origin<span class="token punctuation">.</span>a <span class="token operator">></span> precision<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> origin<span class="token punctuation">;</span>
+      <span class="token punctuation">&#125;</span>
+
+      <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">fixed</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">3</span><span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">fixed</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> <span class="token number">3</span><span class="token punctuation">;</span> <span class="token operator">++</span>j<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+          <span class="token class-name">float2</span> tempUV <span class="token operator">=</span> uv <span class="token operator">+</span> <span class="token function">float2</span><span class="token punctuation">(</span>i <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> j <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">*</span> width<span class="token punctuation">;</span>
+          <span class="token class-name">fixed4</span> c <span class="token operator">=</span> <span class="token function">tex2D</span><span class="token punctuation">(</span>tex<span class="token punctuation">,</span> tempUV<span class="token punctuation">)</span><span class="token punctuation">;</span>
+          <span class="token keyword">if</span> <span class="token punctuation">(</span>c<span class="token punctuation">.</span>a <span class="token operator">></span> precision<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">return</span> color<span class="token punctuation">;</span>
+          <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+      <span class="token punctuation">&#125;</span>
+
+      <span class="token keyword">return</span> origin<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">surf</span><span class="token punctuation">(</span><span class="token class-name">Input</span> IN<span class="token punctuation">,</span> inout <span class="token class-name">SurfaceOutput</span> o<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+      <span class="token class-name">half4</span> c <span class="token operator">=</span> <span class="token function">GetOutlineColor</span><span class="token punctuation">(</span>_MainTex<span class="token punctuation">,</span> IN<span class="token punctuation">.</span>uv_MainTex<span class="token punctuation">,</span> _Color<span class="token punctuation">,</span> _Width <span class="token operator">*</span> <span class="token number">0.01</span><span class="token punctuation">,</span> _Precision<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      o<span class="token punctuation">.</span>Emission <span class="token operator">=</span> c<span class="token punctuation">.</span>rgb<span class="token punctuation">;</span>
+      o<span class="token punctuation">.</span>Alpha <span class="token operator">=</span> c<span class="token punctuation">.</span>a<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    ENDCG
+  <span class="token punctuation">&#125;</span>
+  Fallback <span class="token string">"Diffuse"</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<p>下一篇:<a href="https://jenocn.github.io/2020/01/UnitySurfaceShader6/">Unity表面着色器笔记(六)</a></p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2019/09/WriteCommonCode3/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2019/09/UnitySurfaceShader4/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2019-09-08 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/Unity/">Unity<span>13</span></a></li> <li><a href="/tags/Shader/">Shader<span>6</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

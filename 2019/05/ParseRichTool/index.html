@@ -1,0 +1,349 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>Cocos2dx中实现一套富文本解析语法 | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="最近负责开发的模块中有一个显示公告的需求,公告中特殊的文字需要变色,很明显,使用富文本能够很轻松的实现,但是,直接写死很明显不是我的方式,于是我决定写一套解析语法,以应变以后其他地方再出现这样的需求.
+本文从以下几点讲解:
+
+分析和设计
+实现
+源码"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Cocos2dx中实现一套富文本解析语法"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> Cocos2dx中实现一套富文本解析语法</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>最近负责开发的模块中有一个显示公告的需求,公告中特殊的文字需要变色,很明显,使用富文本能够很轻松的实现,但是,直接写死很明显不是我的方式,于是我决定写一套解析语法,以应变以后其他地方再出现这样的需求.</p>
+<p>本文从以下几点讲解:</p>
+<ul>
+<li>分析和设计</li>
+<li>实现</li>
+<li>源码</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="分析和设计"><a href="#分析和设计" class="headerlink" title="分析和设计"></a>分析和设计</h2><ol>
+<li>我希望使用的方式非常简单,并且将解析和<code>RichText</code>的创建分离,这样的好处是以后可以随时替换显示的方式,也便于维护,这样一来,显示部分非常简单,就是根据解析后生成的数据来逐一创建就可以了.</li>
+<li>字符串解析部分,将通过<code>|</code>来划分每个<code>Element</code>字符串,然后每个字符串中再使用<code>;</code>来划分具体的内容以及命令,命令采用<code>()</code>包括的方式,如果是普通文本,不需要加命令语法</li>
+<li>支持风格声明,即声明一个或多个样式,在这一条字符串中,都可以通过样式的变量名来引用样式,这样在一段字符串中,需要分割多处显示同一种样式的时候,减小字符串长度</li>
+<li>颜色中<code>r</code> <code>g</code> <code>b</code> <code>a</code>都分别以一个字符来表示,从<code>0 ~ f</code></li>
+<li>除了命令的语法部分,其他部分都能支持变量,变量采用{{ }}的方式来声明,变量在代码中设置之后以替换为需要显示的数据</li>
+<li>命令设计<pre class="line-numbers language-none"><code class="language-none">&#123;% raw %&#125;
+(common)styleName; &#x2F;&#x2F; 用于声明一段样式
+(l)styleName; &#x2F;&#x2F; 用于引用一段样式, l-&gt;link
+(s)20; &#x2F;&#x2F; 用于声明一个字体大小, s-&gt;size
+(c)ffff; &#x2F;&#x2F; 用于声明一个颜色, c-&gt;color
+(i)filename.png; &#x2F;&#x2F; 用于声明一张图片, i-&gt;image
+(f)family.ttf; &#x2F;&#x2F; 用于声明使用的字体, f-&gt;family
+&#123;&#123;param&#125;&#125; &#x2F;&#x2F; 用于声明一个变量,以便在代码中修改
+&#123;% endraw %&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+预期的使用情况就是:<pre class="line-numbers language-none"><code class="language-none">&#123;% raw %&#125;
+&#x2F;&#x2F; 常规方式,表示创建两个文本和一个图片,第一个红色32号msg.ttf字体,第二个蓝色24号字体默认字体,第三创建avatar.jpg图片
+Hello World!;(s)32;(c)f00f(f)msg.ttf | I&#39;m Jenocn;(s)24;(c)00ff | (i)avatar.jpg
+&#x2F;&#x2F; 样式在分割比较多并且不集中显示一种样式的情况下使用
+(common)style1;(c)ff0f;(s)20 | (common)style2;(s)22 | 1;(l)style1 | 2;(l)style2 | 3;(l)style1 | 4;(l)style2 | 5;(l)style1 | 6;(l)style2
+&#x2F;&#x2F; 变量
+1.替换文本,代码中可以修改声明的 name 和 age 两个变量
+Hello &#123;&#123;name&#125;&#125;!;(s)20;(c)ff0f | [&#123;&#123;name&#125;&#125;: &#123;&#123;age&#125;&#125;];(s)18;(c)f85f
+2.结合样式使用,代码中通过修改 style 的变量为前面声明的变量,已达到变化
+(common)style1;(c)ff0f;(s)20 | (common);style2;(s)22 | Hello World!;(l)&#123;&#123;style&#125;&#125;
+&#123;% endraw %&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
+</ol>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>代码中使用必须要简单:<br>需要一个<code>ParseRichTool</code>类用于解析字符串</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; 传入源字符串,解析并返回需要的数据
+std::vector&lt;std::shared_ptr&lt;ParseRichData&gt;&gt; Parse(const std::string&amp; destStr);
+&#x2F;&#x2F; 设置变量
+void SetParam(const std::string&amp; key, const std::string&amp; value);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>需要一个字符串工具,我自己实现了一个<code>StringToCocos</code>类,包含了一些常用的字符串操作方法</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; 该类中需要用到的方法
+&#x2F;&#x2F; 替换字符串
+static std::string replace(const std::string&amp; str, const std::string&amp; find, const std::string&amp; dest);
+&#x2F;&#x2F; 切割字符串
+static std::vector&lt;std::string&gt; split(const std::string&amp; str, char splitWord, bool bTrim &#x3D; false);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>需要一个<code>ParseRichData</code>结构体用于保存解析后的单个元素数据</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; 基本的数据
+ParseRichType type&#123; ParseRichType::None &#125;; &#x2F;&#x2F; 类型
+std::string text; &#x2F;&#x2F; 文本
+std::string family; &#x2F;&#x2F; 字体
+cocos2d::Color4B color&#123; cocos2d::Color4B::WHITE &#125;; &#x2F;&#x2F; 颜色
+int fontSize&#123; 20 &#125;; &#x2F;&#x2F; 字体大小
+std::string filename; &#x2F;&#x2F; 图片路径,只有当类型为图片时才有意义<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>需要一个<code>ParseRichType</code>枚举用于区分类型和方便扩展</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">enum class ParseRichType
+&#123;
+    None &#x3D; 0,
+    Text,
+    Image,
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>具体实现其实就是字符串的切割和命令的解析,所以没什么需要详细讲的,贴一个段测试代码,直接copy到cocos中就可以看到效果</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#123;% raw %&#125;
+bool init()
+&#123;
+    ParseRichTool tool;
+    tool.SetParam(&quot;name&quot;, &quot;Jenocn&quot;);
+    tool.SetParam(&quot;age&quot;, &quot;26&quot;);
+    tool.SetParam(&quot;style&quot;, &quot;style1&quot;);
+
+    auto func &#x3D; [](const decltype(tool.Parse(&quot;&quot;))&amp; data, int index)-&gt;RichText* &#123;
+        auto richText &#x3D; RichText::create();
+        for (auto d : data)
+        &#123;
+            if (d-&gt;type &#x3D;&#x3D; ParseRichType::Text)
+            &#123;
+                auto element &#x3D; RichElementText::create(0, Color3B(d-&gt;color), d-&gt;color.a, d-&gt;text, d-&gt;family, d-&gt;fontSize);
+                richText-&gt;pushBackElement(element);
+            &#125;
+        &#125;
+        richText-&gt;setPosition(Vec2(500, index * 100));
+        return richText;
+    &#125;;
+
+    auto data1 &#x3D; std::move(tool.Parse(&quot;Hello World!;(s)32;(c)f00f(f)msg.ttf | I&#39;m Jenocn;(s)24;(c)99ff | (i)avatar.jpg&quot;));
+    addChild(func(data1, 1), INT_MAX);
+    auto data2 &#x3D; std::move(tool.Parse(&quot;(common)style1;(c)ff0f;(s)20 | (common)style2;(s)22 | 1;(l)style1 | 2;(l)style2 | 3;(l)style1 | 4;(l)style2 | 5;(l)style1 | 6;(l)style2&quot;));
+    addChild(func(data2, 2), INT_MAX);
+    auto data3 &#x3D; std::move(tool.Parse(&quot;Hello &#123;&#123;name&#125;&#125;!;(s)20;(c)ff0f | [&#123;&#123;name&#125;&#125;: &#123;&#123;age&#125;&#125;];(s)18;(c)f85f&quot;));
+    addChild(func(data3, 3), INT_MAX);
+    auto data4 &#x3D; std::move(tool.Parse(&quot;(common)style1;(c)ff0f;(s)20 | (common);style2;(s)22 | Hello World!;(l)&#123;&#123;style&#125;&#125;&quot;));
+    addChild(func(data4, 4), INT_MAX);
+    return true;
+&#125;
+&#123;% endraw %&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>效果:</p>
+<img src="/2019/05/ParseRichTool/test.jpg" class="" title="测试结果">
+
+<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>源码下载地址<br><a href="https://pan.baidu.com/s/1ZuoQiDZHUIMfVFwLL03dTQ" target="_blank">https://pan.baidu.com/s/1ZuoQiDZHUIMfVFwLL03dTQ</a><br>提取码：x40a  </p>
+<p>这篇文章到这里就结束了,希望能够帮到大家,如有问题可以邮我,一起交流学习!  </p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2019/06/WriteCommonCode/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2019/05/webpack-init/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2019-05-07 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/C/">C++<span>7</span></a></li> <li><a href="/tags/Cocos/">Cocos<span>1</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

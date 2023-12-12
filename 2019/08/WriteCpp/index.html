@@ -1,0 +1,320 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>C++中,(值,引用,指针)在传递时的注意事项 | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="值,引用,指针,这是c++必须要掌握的要点,也是C++的一个难点,所以想写下我的理解,讲一讲传递时的区别的注意事项.
+
+值,引用,指针
+*右值引用和移动构造"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="C++中,(值,引用,指针)在传递时的注意事项"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> C++中,(值,引用,指针)在传递时的注意事项</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>值,引用,指针,这是c++必须要掌握的要点,也是C++的一个难点,所以想写下我的理解,讲一讲传递时的区别的注意事项.</p>
+<ul>
+<li>值,引用,指针</li>
+<li>*右值引用和移动构造</li>
+</ul>
+<span id="more"></span>
+
+<hr>
+<h2 id="值-引用-指针"><a href="#值-引用-指针" class="headerlink" title="值,引用,指针"></a>值,引用,指针</h2><p>这里用一个例子</p>
+<h4 id="参数传递-返回值"><a href="#参数传递-返回值" class="headerlink" title="参数传递&#x2F;返回值"></a>参数传递&#x2F;返回值</h4><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">struct</span> <span class="token class-name">Vec2</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">float</span> x<span class="token punctuation">;</span>
+    <span class="token keyword">float</span> y<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">&#123;</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token comment">// 值传递</span>
+    <span class="token keyword">void</span> <span class="token function">setPosition</span><span class="token punctuation">(</span>Vec2 pos<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+    <span class="token comment">// 引用传递</span>
+    <span class="token keyword">void</span> <span class="token function">setPosition</span><span class="token punctuation">(</span><span class="token keyword">const</span> Vec2<span class="token operator">&amp;</span> pos<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 指针传递</span>
+    <span class="token keyword">void</span> <span class="token function">setPosition</span><span class="token punctuation">(</span><span class="token keyword">const</span> Vec2<span class="token operator">*</span> pos<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+
+    <span class="token comment">// 返回值对象</span>
+    Vec2 <span class="token function">getPosition</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span> 
+    <span class="token comment">// 返回引用对象</span>
+    <span class="token keyword">const</span> Vec2<span class="token operator">&amp;</span> <span class="token function">getPosition</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span> 
+    <span class="token comment">// 返回指针对象</span>
+    <span class="token keyword">const</span> Vec2<span class="token operator">*</span> <span class="token function">getPosition</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span> 
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>三种方式的区别:</strong>  </p>
+<ul>
+<li>引用本身占用4个字节</li>
+<li>值传递会创建一个临时对象,意味着分配多余的空间</li>
+<li>指针可能为空或野指针</li>
+<li>加const是防止函数内修改参数对象本身</li>
+</ul>
+<p>&emsp;&emsp;值传递会创建一个该类型的临时对象,而引用传递不会创建这个对象,但会创建引用,所以,当传递的值在创建时需要的空间大于4字节的时候,使用值传递就不那么好了,一般情况下,内置的基本数据类型像int,float,char这类,都不用使用引用传递,而直接传值,像自定义的类都推荐使用引用传递.<br>&emsp;&emsp;至于不使用指针传递,是因为,指针有可能为nullptr类型或者野指针问题,安全性不如引用类型.</p>
+<ul>
+<li><em>返回引用或指针时需要考虑该对象是否被释放</em></li>
+</ul>
+<p>&emsp;&emsp;在返回值中,如果返回的对象不会立即释放,也返回const引用,<strong>不过接收返回值的时候,也要使用const引用去接收,这时最容易被忽略的</strong></p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">const</span> <span class="token keyword">auto</span><span class="token operator">&amp;</span> retValue <span class="token operator">=</span> <span class="token function">getPosition</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<br>
+
+<h2 id="右值引用和移动构造"><a href="#右值引用和移动构造" class="headerlink" title="*右值引用和移动构造"></a>*右值引用和移动构造</h2><p>扩展一下,在C++11中,增加了右值引用的概念,右值引用需要结合移动构造来使用</p>
+<p>在写一个class的时候,会默认创建一个无参构造函数和一个拷贝构造函数,现在构造函数家族又新增加了一个移动构造函数</p>
+<ul>
+<li><em>右值引用看作是一个服务于参数的特殊引用类型</em></li>
+<li><em>移动构造必须自行实现</em></li>
+<li><em>如果没有实现移动构造,右值引用赋值时将视为普通拷贝构造</em></li>
+</ul>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">&#123;</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token comment">// 构造函数</span>
+    <span class="token function">A</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+    <span class="token comment">// 拷贝构造函数</span>
+    <span class="token function">A</span><span class="token punctuation">(</span><span class="token keyword">const</span> A<span class="token operator">&amp;</span> a<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+    <span class="token comment">// 移动构造函数</span>
+    <span class="token function">A</span><span class="token punctuation">(</span>A<span class="token operator">&amp;&amp;</span> a<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>&emsp;&emsp;在stl中有一个方法<code>std::move</code>用于将一个普通类型转换为右值引用,该方法实际上就相当于<code>static_cast&lt;T&amp;&amp;&gt;(value)</code>,所以网上常说的,std::move没有move任何东西,它本质上就是做了一个类型转换,将一个普通类型转换为右值引用类型,那么转换为右值引用后该怎么用呢,这就要结合参数了,当你写了一个方法的参数使用了右值引用类型,那么这是就会调用它了,最大的作用目前是在移动构造函数了,所以我理解为,右值引用是一个服务于参数的类型</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">A value1<span class="token punctuation">;</span>
+A value2 <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span>value1<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 将调用移动构造创建这个对象</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>这个移动构造,最大的用处还是在stl容器的使用上</p>
+<p>比如需要转移一个容器内的数据:</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> temp <span class="token punctuation">&#123;</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token comment">/**
+    这时,将会调用std::vector的移动构造,
+    而实现里面会将temp的指针转移到temp2上,
+    而temp将会为空(约定上temp将已经被释放)
+*/</span>
+<span class="token keyword">auto</span> temp2 <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span>temp<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2019/08/UnitySurfaceShader2/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2019/07/GameScriptIntroduce/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2019-08-14 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/C/">C++<span>7</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

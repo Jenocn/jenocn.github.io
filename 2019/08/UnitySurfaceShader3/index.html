@@ -1,0 +1,361 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>Unity表面着色器笔记(三) - 纹理混合 | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="这篇要讲的是纹理贴图以及纹理混合,掌握纹理混合就可以做很多2D游戏的特效啦,激动啊!
+
+纹理贴图
+颜色效果
+纹理混合"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Unity表面着色器笔记(三) - 纹理混合"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> Unity表面着色器笔记(三) - 纹理混合</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>这篇要讲的是纹理贴图以及纹理混合,掌握纹理混合就可以做很多2D游戏的特效啦,激动啊!</p>
+<ul>
+<li>纹理贴图</li>
+<li>颜色效果</li>
+<li>纹理混合</li>
+</ul>
+<span id="more"></span>
+
+<hr>
+<p>上一篇:<a href="https://jenocn.github.io/2019/08/UnitySurfaceShader2/">Unity表面着色器笔记(二)</a></p>
+<hr>
+<p>效果展示:<br>(原图, 置灰, 反转, 增加亮部减暗暗部)<br>(各种纹理混合)<br><img src="/shader_img.jpg" alt="display"></p>
+<h2 id="纹理贴图"><a href="#纹理贴图" class="headerlink" title="纹理贴图"></a>纹理贴图</h2><p>翻到上一篇,Properties属性中有一个<code>2D</code>类型,它表示一张纹理的信息,所以我们需要在属性中定义它,用于获取外部纹理</p>
+<p><em>代码直接在第一篇中写的小练习上直接改</em></p>
+<pre class="line-numbers language-CG" data-language="CG"><code class="language-CG">Properties &#123;
+    _MainTex (&quot;Main Texture&quot;, 2D) &#x3D; &quot;white&quot; &#123;&#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>然后想在CGPROGRAM中使用它,需要再声明一次</p>
+<pre class="line-numbers language-CG" data-language="CG"><code class="language-CG">CGPROGRAM
+sampler2D _MainTex;
+ENDCG<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>定义Input结构体</p>
+<pre class="line-numbers language-CG" data-language="CG"><code class="language-CG">struct Input &#123;
+    &#x2F;&#x2F; 纹理坐标
+    float2 uv_MainTex;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h5 id="然后在surf函数中调用纹理-并输出颜色-这里引入一个方法tex2D"><a href="#然后在surf函数中调用纹理-并输出颜色-这里引入一个方法tex2D" class="headerlink" title="然后在surf函数中调用纹理,并输出颜色,这里引入一个方法tex2D"></a>然后在surf函数中调用纹理,并输出颜色,这里引入一个方法<code>tex2D</code></h5><p>参数接收纹理和采样坐标,返回纹理在采样坐标位置的颜色值<br><code>fixed4 tex2D(sampler2D texture, float2 pos);</code></p>
+<pre class="line-numbers language-CG" data-language="CG"><code class="language-CG">void surf(Input IN, inout SurfaceOutput o) &#123;
+    fixed4 c &#x3D; tex2D(_MainTex, IN.uv_MainTex);
+    &#x2F;&#x2F; 忽略光照影响,直接赋值给自发光
+    o.Emission &#x3D; c.rgb;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>这样就完成贴图了,在Unity中查看吧,需要将纹理拖放到材质上,就可以看到图片显示了</p>
+<p>完整代码:</p>
+<pre class="line-numbers language-CG" data-language="CG"><code class="language-CG">Shader &quot;Custom&#x2F;ShaderDemo1&quot; &#123;
+    Properties &#123;
+        _MainTex (&quot;Main Texture&quot;, 2D) &#x3D; &quot;white&quot; &#123;&#125;
+    &#125;
+    SubShader &#123;
+        CGPROGRAM
+
+        #pragma surface surf Lambert
+
+        sampler2D _MainTex;
+
+        struct Input &#123;
+            float2 uv_MainTex;
+        &#125;;
+
+        void surf(Input IN, inout SurfaceOutput o) &#123;
+            fixed4 c &#x3D; tex2D(_MainTex, IN.uv_MainTex);
+            o.Emission &#x3D; c.rgb;
+            o.Alpha &#x3D; c.a;
+        &#125;
+        ENDCG
+    &#125;
+    FallBack &quot;Diffuse&quot;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="颜色混合"><a href="#颜色混合" class="headerlink" title="颜色混合"></a>颜色混合</h2><p>只需要对上面tex2D输出的颜色做一点小小的修改,就可以实现各种效果,这里列举两个,置灰和反转色,其他的可以自己修改各种值来试试</p>
+<h4 id="置灰"><a href="#置灰" class="headerlink" title="置灰"></a>置灰</h4><p>置灰有很多种计算方式,本质上一张灰度图其实就是没有色彩,只有明暗,所以RGB三个值都是相同的,我这里采用RGB取最小值的方式实现,这也是比较简单的方法,不用去对颜色做RGB转HSL的来回转换了</p>
+<pre class="line-numbers language-CG" data-language="CG"><code class="language-CG">void surf(Input IN, inout SurfaceOutput o) &#123;
+    fixed4 c &#x3D; tex2D(_MainTex, IN.uv_MainTex);
+
+    &#x2F;&#x2F; 将c.rgb赋值为最小值, min方法用于获取最小值
+    c.rgb &#x3D; min(c.r, min(c.g, c.b));
+
+    o.Emission &#x3D; c.rgb;
+    o.Alpha &#x3D; c.a;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h4 id="反转色"><a href="#反转色" class="headerlink" title="反转色"></a>反转色</h4><p>反转色就是取互补值得颜色嘛,用最大值减去当前颜色就行了</p>
+<pre class="line-numbers language-CG" data-language="CG"><code class="language-CG">void surf(Input IN, inout SurfaceOutput o) &#123;
+    fixed4 c &#x3D; tex2D(_MainTex, IN.uv_MainTex);
+
+    &#x2F;&#x2F; 最大值白色值为1
+    c.rgb &#x3D; 1 - c.rgb;
+
+    o.Emission &#x3D; c.rgb;
+    o.Alpha &#x3D; c.a;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+<h2 id="纹理混合"><a href="#纹理混合" class="headerlink" title="纹理混合"></a>纹理混合</h2><p>纹理混合就是同时显示两张纹理,原理是将两张纹理对应坐标的颜色采用一个计算方式混合生成新的颜色,纹理的混合有很多种方式,像常见的有正片叠底,这里就使用正片叠底来作为例子,其他的混合方式可以网上搜索,后面我会给出一个公式参考图.</p>
+<p>在Properties中增加一个纹理属性</p>
+<pre class="line-numbers language-CG" data-language="CG"><code class="language-CG">Properties &#123;
+    _MainTex (&quot;Main Texture&quot;, 2D) &#x3D; &quot;white&quot; &#123;&#125;
+    &#x2F;&#x2F; 新增一个用于混合的纹理属性
+    _MixTex (&quot;Mix Texture&quot;, 2D) &#x3D; &quot;white&quot; &#123;&#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在surf函数中使用,别忘了声明这个变量.</p>
+<pre class="line-numbers language-CG" data-language="CG"><code class="language-CG">void surf(Input IN, inout SurfaceOutput o) &#123;
+    &#x2F;&#x2F; 贴图
+    fixed4 c_main &#x3D; tex2D(_MainTex, IN.uv_MainTex);
+    &#x2F;&#x2F; 获取混合纹理的采样颜色
+    fixed4 c_mix &#x3D; tex2D(_MixTex, IN.uv_MainTex);
+    &#x2F;&#x2F; 两个颜色相乘
+    fixed4 c &#x3D; c_main * c_mix;
+
+    o.Emission &#x3D; c.rgb;
+    o.Alpha &#x3D; c.a;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>然后找一张用于混合的纹理,查看效果吧.</p>
+<hr>
+<p>供参考的公式:</p>
+<img src="/2019/08/UnitySurfaceShader3/shader_img2.jpg" class="" title="混合公式">
+<p>来源: <a target="_blank" rel="noopener" href="https://jingyan.baidu.com/article/36d6ed1f7c04801bcf4883c2.html">https://jingyan.baidu.com/article/36d6ed1f7c04801bcf4883c2.html</a></p>
+<hr>
+<p>下一篇:<a href="https://jenocn.github.io/2019/09/UnitySurfaceShader4/">Unity表面着色器笔记(四)</a></p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2019/09/UnitySurfaceShader4/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2019/08/UnitySurfaceShader2/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2019-08-17 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/Unity/">Unity<span>13</span></a></li> <li><a href="/tags/Shader/">Shader<span>6</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

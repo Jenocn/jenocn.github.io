@@ -1,0 +1,325 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>资源与逻辑分离,枚举法管理音频资源的播放 | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="执着于写一个思路清晰,便于维护和后期修改的代码是一个程序员的追求和技术素养. 这一篇讲一讲音频调用方式的书写技巧"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="资源与逻辑分离,枚举法管理音频资源的播放"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> 资源与逻辑分离,枚举法管理音频资源的播放</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>执着于写一个思路清晰,便于维护和后期修改的代码是一个程序员的追求和技术素养. 这一篇讲一讲音频调用方式的书写技巧</p>
+<span id="more"></span>
+
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><p>播放一个背景音乐和按需播放音效是再普遍不过的功能需求了,最简单的方式就是直接播放音频资源,一般引擎都有提供播放音乐的功能</p>
+<p>例如播放一个背景音乐:</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">AudioEngine::GetInstance()-&gt;PlayBGM(&quot;xxx&#x2F;xxx&#x2F;xxx&#x2F;xxxxx.mp3&quot;);<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>例如播放一个音效:</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">AudioEngine::GetInstance()-&gt;PlaySound(&quot;xxx&#x2F;xxx&#x2F;xxx&#x2F;xxxxx.mp3&quot;);<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>这种直接调用的方式,可以实现功能,但是对于后期修改音频文件名,或者替换音效的情况时,就需要在整个代码中去寻找并修改,是非常低效的</p>
+<h2 id="技巧"><a href="#技巧" class="headerlink" title="技巧"></a>技巧</h2><p>对于处理这种情况,有很多解决方法,这里提供一个方法</p>
+<p>对于音效和背景音乐,提供一个枚举,例如<code>开火声</code>,<code>跳跃</code>,<code>获得道具</code>等等具体的音效,放到这个枚举中</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">enum class eAudioBGM &#123;
+  None &#x3D; 0,
+  TitleScene, &#x2F;&#x2F; 标题场景的bgm
+&#125;;
+enum class eAudioSound &#123;
+  None &#x3D; 0,
+  Fire, &#x2F;&#x2F; 开火
+  Jump, &#x2F;&#x2F; 跳跃
+  ItemGet, &#x2F;&#x2F; 获得道具
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>有了以上的枚举,一切就方便起来了,到这里,大家肯定都明白了</p>
+<p><strong>音乐播放器类</strong></p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class AudioPlayer &#123;
+public:
+  void InitAudio();
+  void PlayBGM(eAudioBGM bgm);
+  int PlaySound(eAudioSound sound);
+  &#x2F;&#x2F; 更多的功能
+  &#x2F;&#x2F; ...
+private:
+  &#x2F;&#x2F; 用于存放背景音乐路径的map
+  std::map&lt;eAudioBGM, std::string&gt; _audioBgmMap;
+  &#x2F;&#x2F; 用于存放音效路径的map
+  std::map&lt;eAudioSound, std::string&gt; _audioSoundMap;
+  &#x2F;&#x2F; 游戏引擎提供的底层音频类
+  GameEngine::AudioEngine* _audioEngine &#123; nullptr &#125;;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>实现</strong></p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">void AudioPlayer::InitAudio() &#123;
+  &#x2F;&#x2F; 这里就可以通过一个json&#x2F;xml的配置文件来载入,并且标记更多的配置
+  &#x2F;&#x2F; 这里仅使用代码中配好的方式
+  _audioBgmMap[eAudioBGM::TitleScene] &#x3D; &quot;music&#x2F;title_scene.mp3&quot;;
+
+  _audioSoundMap[eAudioSound::Fire] &#x3D; &quot;sound&#x2F;fire.mp3&quot;;
+  _audioSoundMap[eAudioSound::Jump] &#x3D; &quot;sound&#x2F;jump.mp3&quot;;
+  _audioSoundMap[eAudioSound::ItemGet] &#x3D; &quot;sound&#x2F;item_get.mp3&quot;;
+
+  &#x2F;&#x2F; 获取单例,是为了后面方便调用,减少GetInstance()调用,这也是一个细节
+  _audioEngine &#x3D; GameEngine::AudioEngine::GetInstance();
+
+  &#x2F;&#x2F; 这里可以根据需要预加载
+  &#x2F;&#x2F; 例如音效我需要预加载
+  for (const auto&amp; pair : _audioSoundMap) &#123;
+    _audioEngine-&gt;Preload(pair.second);
+  &#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>以上初始化,在游戏加载时调用一次就好了</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">void AudioPlayer::PlayBGM(eAudioBGM bgm) &#123;
+  auto ite &#x3D; _audioBgmMap.find(bgm);
+  if (ite !&#x3D; _audioBgmMap.end()) &#123;
+    _audioEngine-&gt;PlayBGM(ite-&gt;second)
+  &#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">int AudioPlayer::PlaySound(eAudioSound sound) &#123;
+  auto ite &#x3D; _audioSoundMap.find(sound);
+  if (ite !&#x3D; _audioSoundMap.end()) &#123;
+    return _audioEngine-&gt;PlaySound(ite-&gt;second)
+  &#125;
+  return -1;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><strong>调用</strong></p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">&#x2F;&#x2F; bgm
+AudioPlayer::GetInstance()-&gt;PlayBGM(eAudioBGM::TitleScene);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">&#x2F;&#x2F; sound
+AudioPlayer::GetInstance()-&gt;PlaySound(eAudioSound::Fire);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>以上,就完整的将音频模块包装了一下,如果再要添加或者修改一个音频,都只需要在InitAudio中修改就好了,即使是删除一个音效,删除枚举,调用的地方IDE也会提示</p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2019/10/BuildStoryWithGameScript/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2019/09/UnitySurfaceShader5/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2019-09-30 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/技巧/">技巧<span>4</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

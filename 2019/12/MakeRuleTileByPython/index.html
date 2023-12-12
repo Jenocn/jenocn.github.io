@@ -1,0 +1,415 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>用python写一个方便制作RuleTile的工具 | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="TiledMap中的RuleTile是非常好用的2d刷地形工具,当你设置好各种相邻条件的图块后,刷地形时它会根据相邻的情况使用对应的图块,这样会更加方便."> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="用python写一个方便制作RuleTile的工具"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> 用python写一个方便制作RuleTile的工具</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>TiledMap中的RuleTile是非常好用的2d刷地形工具,当你设置好各种相邻条件的图块后,刷地形时它会根据相邻的情况使用对应的图块,这样会更加方便.</p>
+<span id="more"></span>
+
+<p><img src="/terrain_temp.jpg" alt="TerrainDisplay"></p>
+<h2 id="RuleTile"><a href="#RuleTile" class="headerlink" title="RuleTile"></a>RuleTile</h2><p>我自己因为需要制作地图,采用了这个方式,但是绘制时遇到了一个问题,那就是条件实在太多了,有47种情况,这要画起来那得多让人崩溃.</p>
+<p><img src="/ruletile_inspector.jpg" alt="RuleTile"></p>
+<p><img src="/condition47.jpg" alt="condition47"></p>
+<p>不过可以发现,很多图块都有很多部位是重复的,将这些重复区域提取出来,会发现是由这样一个基础图块组成的</p>
+<p><img src="/metatile.jpg" alt="Metatile"></p>
+<p>这是粒度更小的基础图块,每4个可以组合成一个大图块,只要绘制这样一个基础图块,我们就可以生成那47个大图块</p>
+<p><img src="/merge.png" alt="Merge"></p>
+<h2 id="使用Python编写"><a href="#使用Python编写" class="headerlink" title="使用Python编写"></a>使用Python编写</h2><p>有了这样一个元图块集和映射关系,就不需要手动去拼接,这时候使用python去编写一个拼接工具</p>
+<h4 id="Image类"><a href="#Image类" class="headerlink" title="Image类"></a>Image类</h4><h5 id="paste-from-box-cur-box-粘贴方法"><a href="#paste-from-box-cur-box-粘贴方法" class="headerlink" title="paste(from_box, cur_box)粘贴方法"></a><code>paste(from_box, cur_box)</code>粘贴方法</h5><p>接受两个参数<br><code>from_box</code>表示从基础图片中置顶区域的切图<br><code>cur_box</code>表示粘贴到自身图片的目标区域</p>
+<h5 id="crop-box-切图方法"><a href="#crop-box-切图方法" class="headerlink" title="crop(box)切图方法"></a><code>crop(box)</code>切图方法</h5><p><code>box</code>表示切图区域</p>
+<p>这样就可以通过:</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">srcImage <span class="token operator">=</span> Image<span class="token punctuation">.</span><span class="token builtin">open</span><span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span> <span class="token comment"># 打开基础图片</span>
+newImage <span class="token operator">=</span> Image<span class="token punctuation">.</span>new<span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span> <span class="token comment"># 新建输出的图片</span>
+src_box <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">16</span><span class="token punctuation">,</span> <span class="token number">16</span><span class="token punctuation">)</span> <span class="token comment"># 基础图块的位置</span>
+dest_box <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span> <span class="token comment"># 欲粘贴的位置</span>
+<span class="token comment"># 实现从一张图上切出区域粘贴到另一张图上的指定区域</span>
+newImage<span class="token punctuation">.</span>paste<span class="token punctuation">(</span>srcImage<span class="token punctuation">.</span>crop<span class="token punctuation">(</span>src_box<span class="token punctuation">)</span><span class="token punctuation">,</span> dest_box<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<p>完整代码</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">from</span> PIL <span class="token keyword">import</span> Image
+<span class="token keyword">import</span> os
+<span class="token keyword">import</span> sys
+
+<span class="token comment"># 获取当前目录</span>
+cur_dir <span class="token operator">=</span> os<span class="token punctuation">.</span>path<span class="token punctuation">.</span>dirname<span class="token punctuation">(</span>__file__<span class="token punctuation">)</span>
+<span class="token comment"># 元数据文件目录</span>
+src_dir <span class="token operator">=</span> cur_dir <span class="token operator">+</span> <span class="token string">"/../"</span>
+<span class="token comment"># 导出目录</span>
+export_dir <span class="token operator">=</span> cur_dir <span class="token operator">+</span> <span class="token string">"/export/"</span>
+<span class="token comment"># 图块像素大小</span>
+pixel_size <span class="token operator">=</span> <span class="token number">16</span>
+<span class="token comment"># 图块缩放比例</span>
+size_scale <span class="token operator">=</span> <span class="token number">4</span>
+<span class="token comment"># 元数据列数</span>
+src_row <span class="token operator">=</span> <span class="token number">5</span>
+<span class="token comment"># 元数据行数</span>
+src_column <span class="token operator">=</span> <span class="token number">3</span>
+<span class="token comment"># 导出图片列数</span>
+dest_row <span class="token operator">=</span> <span class="token number">6</span>
+<span class="token comment"># 导出图片行数</span>
+dest_column <span class="token operator">=</span> <span class="token number">32</span>
+<span class="token comment"># 导出图片映射表</span>
+dest_maps <span class="token operator">=</span> <span class="token punctuation">[</span>
+  <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span>
+  <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">,</span> <span class="token number">12</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span>
+  <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">12</span><span class="token punctuation">,</span>
+  <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span>
+  <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span>
+  <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">,</span>
+  <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span>
+  <span class="token number">11</span><span class="token punctuation">,</span> <span class="token number">12</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span>
+  <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span> <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span>
+  <span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">,</span> <span class="token number">12</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">,</span>
+  <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span>
+  <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span>
+  <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span>
+  <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span>
+  <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span> <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span>
+  <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">,</span>
+  <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span>
+  <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span>
+  <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span> <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span>
+  <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">,</span>
+  <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span>
+  <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span>
+  <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span>
+  <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span>
+  <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span> <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span>
+  <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span>
+  <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span> <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span> <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span>
+  <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span>
+  <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span> <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span>
+  <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span>
+  <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span>
+  <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">12</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span>
+<span class="token punctuation">]</span>
+
+<span class="token comment"># 计算出size的大小</span>
+grid_size <span class="token operator">=</span> pixel_size <span class="token operator">*</span> size_scale
+
+<span class="token comment"># 用于获取扩展名的方法</span>
+<span class="token keyword">def</span> <span class="token function">extname</span><span class="token punctuation">(</span>filename<span class="token punctuation">)</span><span class="token punctuation">:</span>
+  ret <span class="token operator">=</span> os<span class="token punctuation">.</span>path<span class="token punctuation">.</span>splitext<span class="token punctuation">(</span>filename<span class="token punctuation">)</span>
+  <span class="token keyword">if</span> <span class="token builtin">len</span><span class="token punctuation">(</span>ret<span class="token punctuation">)</span> <span class="token operator">>=</span> <span class="token number">2</span><span class="token punctuation">:</span>
+    <span class="token keyword">return</span> ret<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>
+  <span class="token keyword">return</span> <span class="token string">""</span>
+
+<span class="token comment"># 查找当前目录</span>
+<span class="token keyword">def</span> <span class="token function">find_str_from_list</span><span class="token punctuation">(</span>li<span class="token punctuation">,</span> <span class="token builtin">str</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+  <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span><span class="token builtin">len</span><span class="token punctuation">(</span>li<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">if</span> li<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token string">"%s"</span> <span class="token operator">%</span> <span class="token punctuation">(</span><span class="token builtin">str</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+      <span class="token keyword">return</span> i
+  <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span>
+
+<span class="token comment"># 获取指定目录,指定扩展名的所有文件</span>
+<span class="token keyword">def</span> <span class="token function">get_all_files</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> filters<span class="token punctuation">:</span> <span class="token builtin">list</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+  files<span class="token punctuation">:</span> <span class="token builtin">list</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+  temp_list <span class="token operator">=</span> os<span class="token punctuation">.</span>listdir<span class="token punctuation">(</span>path<span class="token punctuation">)</span>
+  <span class="token keyword">for</span> check <span class="token keyword">in</span> temp_list<span class="token punctuation">:</span>
+    check_path <span class="token operator">=</span> os<span class="token punctuation">.</span>path<span class="token punctuation">.</span>join<span class="token punctuation">(</span>path<span class="token punctuation">,</span> check<span class="token punctuation">)</span>
+    <span class="token keyword">if</span> os<span class="token punctuation">.</span>path<span class="token punctuation">.</span>isdir<span class="token punctuation">(</span>check_path<span class="token punctuation">)</span><span class="token punctuation">:</span>
+      deep_files <span class="token operator">=</span> get_all_files<span class="token punctuation">(</span>check_path<span class="token punctuation">,</span> filters<span class="token punctuation">)</span>
+      <span class="token keyword">for</span> deep_file <span class="token keyword">in</span> deep_files<span class="token punctuation">:</span>
+        files<span class="token punctuation">.</span>append<span class="token punctuation">(</span>deep_file<span class="token punctuation">)</span>
+    <span class="token keyword">else</span><span class="token punctuation">:</span>
+      ext <span class="token operator">=</span> extname<span class="token punctuation">(</span>check_path<span class="token punctuation">)</span>
+      find_index <span class="token operator">=</span> find_str_from_list<span class="token punctuation">(</span>filters<span class="token punctuation">,</span> ext<span class="token punctuation">)</span>
+      <span class="token keyword">if</span> find_index <span class="token operator">>=</span> <span class="token number">0</span><span class="token punctuation">:</span>
+        files<span class="token punctuation">.</span>append<span class="token punctuation">(</span>check_path<span class="token punctuation">)</span>
+  <span class="token keyword">return</span> files
+
+<span class="token comment"># 删除目录</span>
+<span class="token keyword">def</span> <span class="token function">remove_dir</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">:</span>
+  temp_list <span class="token operator">=</span> os<span class="token punctuation">.</span>listdir<span class="token punctuation">(</span>path<span class="token punctuation">)</span>
+  <span class="token keyword">for</span> check <span class="token keyword">in</span> temp_list<span class="token punctuation">:</span>
+    check_path <span class="token operator">=</span> os<span class="token punctuation">.</span>path<span class="token punctuation">.</span>join<span class="token punctuation">(</span>path<span class="token punctuation">,</span> check<span class="token punctuation">)</span>
+    <span class="token keyword">if</span> os<span class="token punctuation">.</span>path<span class="token punctuation">.</span>isdir<span class="token punctuation">(</span>check_path<span class="token punctuation">)</span><span class="token punctuation">:</span>
+      remove_dir<span class="token punctuation">(</span>check_path<span class="token punctuation">)</span>
+      os<span class="token punctuation">.</span>rmdir<span class="token punctuation">(</span>check_path<span class="token punctuation">)</span>
+    <span class="token keyword">else</span><span class="token punctuation">:</span>
+      os<span class="token punctuation">.</span>remove<span class="token punctuation">(</span>check_path<span class="token punctuation">)</span>
+
+<span class="token comment"># 创建目录</span>
+<span class="token keyword">def</span> <span class="token function">mk_dir</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">:</span>
+  <span class="token keyword">if</span> os<span class="token punctuation">.</span>path<span class="token punctuation">.</span>isfile<span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">return</span>
+  <span class="token keyword">if</span> <span class="token keyword">not</span> os<span class="token punctuation">.</span>path<span class="token punctuation">.</span>exists<span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    mk_dir<span class="token punctuation">(</span>os<span class="token punctuation">.</span>path<span class="token punctuation">.</span>dirname<span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    os<span class="token punctuation">.</span>mkdir<span class="token punctuation">(</span>path<span class="token punctuation">)</span>
+
+<span class="token comment"># 从基础图集生成最终的图块图集</span>
+<span class="token keyword">def</span> <span class="token function">convert_to_altas</span><span class="token punctuation">(</span>filename<span class="token punctuation">)</span><span class="token punctuation">:</span>
+  <span class="token keyword">if</span> <span class="token keyword">not</span> os<span class="token punctuation">.</span>path<span class="token punctuation">.</span>exists<span class="token punctuation">(</span>filename<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">return</span> <span class="token string">""</span>
+  src_img <span class="token operator">=</span> Image<span class="token punctuation">.</span><span class="token builtin">open</span><span class="token punctuation">(</span>filename<span class="token punctuation">)</span>
+  dest_img <span class="token operator">=</span> Image<span class="token punctuation">.</span>new<span class="token punctuation">(</span>
+    <span class="token string">"RGBA"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>dest_row <span class="token operator">*</span> grid_size<span class="token punctuation">,</span> dest_column <span class="token operator">*</span> grid_size<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span><span class="token builtin">len</span><span class="token punctuation">(</span>dest_maps<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    sign <span class="token operator">=</span> dest_maps<span class="token punctuation">[</span>i<span class="token punctuation">]</span>
+    <span class="token keyword">if</span> sign <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">:</span>
+      <span class="token keyword">continue</span>
+    src_y <span class="token operator">=</span> <span class="token builtin">int</span><span class="token punctuation">(</span>sign <span class="token operator">/</span> src_row<span class="token punctuation">)</span>
+    src_x <span class="token operator">=</span> <span class="token builtin">int</span><span class="token punctuation">(</span>sign <span class="token operator">%</span> src_row<span class="token punctuation">)</span>
+    src_box <span class="token operator">=</span> <span class="token punctuation">(</span>src_x <span class="token operator">*</span> grid_size<span class="token punctuation">,</span> src_y <span class="token operator">*</span> grid_size<span class="token punctuation">,</span>
+           <span class="token punctuation">(</span>src_x <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">*</span> grid_size<span class="token punctuation">,</span> <span class="token punctuation">(</span>src_y <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">*</span> grid_size<span class="token punctuation">)</span>
+
+    dest_y <span class="token operator">=</span> <span class="token builtin">int</span><span class="token punctuation">(</span>i <span class="token operator">/</span> dest_row<span class="token punctuation">)</span>
+    dest_x <span class="token operator">=</span> <span class="token builtin">int</span><span class="token punctuation">(</span>i <span class="token operator">%</span> dest_row<span class="token punctuation">)</span>
+    dest_box <span class="token operator">=</span> <span class="token punctuation">(</span>dest_x <span class="token operator">*</span> grid_size<span class="token punctuation">,</span> dest_y <span class="token operator">*</span> grid_size<span class="token punctuation">,</span>
+          <span class="token punctuation">(</span>dest_x <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">*</span> grid_size<span class="token punctuation">,</span> <span class="token punctuation">(</span>dest_y <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">*</span> grid_size<span class="token punctuation">)</span>
+    dest_img<span class="token punctuation">.</span>paste<span class="token punctuation">(</span>src_img<span class="token punctuation">.</span>crop<span class="token punctuation">(</span>src_box<span class="token punctuation">)</span><span class="token punctuation">,</span> dest_box<span class="token punctuation">)</span>
+
+  dest_filename <span class="token operator">=</span> export_dir <span class="token operator">+</span> filename<span class="token punctuation">.</span>replace<span class="token punctuation">(</span>src_dir<span class="token punctuation">,</span> <span class="token string">""</span><span class="token punctuation">)</span>
+  mk_dir<span class="token punctuation">(</span>os<span class="token punctuation">.</span>path<span class="token punctuation">.</span>dirname<span class="token punctuation">(</span>dest_filename<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  dest_img<span class="token punctuation">.</span>save<span class="token punctuation">(</span>dest_filename<span class="token punctuation">)</span>
+  <span class="token keyword">return</span> dest_filename
+
+remove_dir<span class="token punctuation">(</span>cur_dir <span class="token operator">+</span> <span class="token string">"/export"</span><span class="token punctuation">)</span>
+
+<span class="token comment"># 将src_dir目录下的所有png后缀的基础图集转换成图块图集并放到export目录下</span>
+files <span class="token operator">=</span> get_all_files<span class="token punctuation">(</span>src_dir<span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token string">".png"</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token keyword">for</span> filename <span class="token keyword">in</span> files<span class="token punctuation">:</span>
+  tempdir <span class="token operator">=</span> os<span class="token punctuation">.</span>path<span class="token punctuation">.</span>dirname<span class="token punctuation">(</span>filename<span class="token punctuation">)</span>
+  dest <span class="token operator">=</span> convert_to_altas<span class="token punctuation">(</span>filename<span class="token punctuation">)</span>
+  <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">"> "</span> <span class="token operator">+</span> dest<span class="token punctuation">)</span>
+
+<span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">"finished."</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2019/12/CrashWithCpp/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2019/10/BuildStoryWithGameScript/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2019-12-24 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/python/">python<span>1</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

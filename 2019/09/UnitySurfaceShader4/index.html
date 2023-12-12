@@ -1,0 +1,369 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>Unity表面着色器笔记(四) - 毛玻璃效果 | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="毛玻璃效果很漂亮,所以来实现一下吧!!"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Unity表面着色器笔记(四) - 毛玻璃效果"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> Unity表面着色器笔记(四) - 毛玻璃效果</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>毛玻璃效果很漂亮,所以来实现一下吧!!</p>
+<span id="more"></span>
+
+<hr>
+<p>上一篇:<a href="https://jenocn.github.io/2019/08/UnitySurfaceShader3/">Unity表面着色器笔记(三)</a></p>
+<hr>
+<p>效果展示:<br><img src="/shader_img2.jpg" alt="display">  </p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>毛玻璃效是一种模糊效果,实现思路应该有很多吧,这里采用最简单的一种方式,以像素为圆心,取周围半径范围内颜色的平均值,即可得到</p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>首先封装一个方法来实现模糊效果  </p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">/**
+参数:
+  tex:纹理
+  uv:纹理取值坐标
+  value:范围值(半径范围)
+  step:取值步数(光滑度)
+  percent:模糊占比(强度)
+返回值:
+  最终颜色
+*/</span>
+<span class="token return-type class-name">half4</span> <span class="token function">GetBlurColor</span><span class="token punctuation">(</span><span class="token class-name">sampler2D</span> tex<span class="token punctuation">,</span> <span class="token class-name">float2</span> uv<span class="token punctuation">,</span> <span class="token class-name">half</span> <span class="token keyword">value</span><span class="token punctuation">,</span> <span class="token class-name">half</span> step<span class="token punctuation">,</span> <span class="token class-name">half</span> percent<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token comment">// 首先限定每个值得范围,使其具有意义,并不会出错</span>
+  <span class="token keyword">value</span> <span class="token operator">=</span> <span class="token function">clamp</span><span class="token punctuation">(</span><span class="token keyword">value</span><span class="token punctuation">,</span> <span class="token number">0.001</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  step <span class="token operator">=</span> <span class="token function">floor</span><span class="token punctuation">(</span><span class="token function">clamp</span><span class="token punctuation">(</span>step<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  percent <span class="token operator">=</span> <span class="token function">clamp</span><span class="token punctuation">(</span>percent<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// 最终返回值,最终取平均值</span>
+  <span class="token class-name">half4</span> ret <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+  <span class="token comment">// 求出每一步的具体长度</span>
+  <span class="token class-name">half</span> delta <span class="token operator">=</span> <span class="token keyword">value</span> <span class="token operator">*</span> <span class="token number">2</span> <span class="token operator">/</span> step<span class="token punctuation">;</span>
+  <span class="token comment">// 用于统计有效迭代次数</span>
+  <span class="token class-name">half</span> count <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+  <span class="token comment">// 用于判断是否在圆内的一个比较值,提前算好,也是为了减少计算量</span>
+  <span class="token class-name">half</span> compareValue <span class="token operator">=</span> <span class="token keyword">value</span> <span class="token operator">*</span> <span class="token keyword">value</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// 遍历纹理在value范围下的坐标[-value ~ value]</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token class-name">half</span> i <span class="token operator">=</span> <span class="token operator">-</span><span class="token keyword">value</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token keyword">value</span><span class="token punctuation">;</span> i <span class="token operator">+=</span> delta<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token class-name">half</span> j <span class="token operator">=</span> <span class="token operator">-</span><span class="token keyword">value</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> <span class="token keyword">value</span><span class="token punctuation">;</span> j <span class="token operator">+=</span> delta<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+      <span class="token comment">// 如果在圆外则不参与取值</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>i <span class="token operator">*</span> i <span class="token operator">+</span> j <span class="token operator">*</span> j <span class="token operator">></span> compareValue<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token keyword">continue</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+      <span class="token comment">// 得到当前位置的坐标</span>
+      <span class="token class-name">float2</span> tempUV <span class="token operator">=</span> uv <span class="token operator">+</span> <span class="token function">float2</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> j<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token comment">// 取当前位置的颜色</span>
+      <span class="token class-name">fixed4</span> c <span class="token operator">=</span> <span class="token function">tex2D</span><span class="token punctuation">(</span>tex<span class="token punctuation">,</span> tempUV<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token comment">// 求和</span>
+      ret <span class="token operator">+=</span> c<span class="token punctuation">;</span>
+      count <span class="token operator">+=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+  <span class="token punctuation">&#125;</span>
+  <span class="token comment">// 取出平均值 * 占比 + 原本颜色 * (1 - 占比)</span>
+  <span class="token keyword">return</span> ret <span class="token operator">/</span> count <span class="token operator">*</span> percent <span class="token operator">+</span> <span class="token function">tex2D</span><span class="token punctuation">(</span>tex<span class="token punctuation">,</span> uv<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token number">1</span> <span class="token operator">-</span> percent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>属性中声明一些外部可以控制的变量,用于调节实际效果</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp">Properties <span class="token punctuation">&#123;</span>
+  _MainTex <span class="token punctuation">(</span><span class="token string">"Main Texture"</span><span class="token punctuation">,</span> <span class="token number">2D</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token string">"white"</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
+  _Radius <span class="token punctuation">(</span><span class="token string">"Radius (范围)"</span><span class="token punctuation">,</span> <span class="token function">Range</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0.2</span>
+  _Smooth <span class="token punctuation">(</span><span class="token string">"Smooth (平滑度)"</span><span class="token punctuation">,</span> <span class="token function">Range</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0.5</span>
+  _Power <span class="token punctuation">(</span><span class="token string">"Power (强度)"</span><span class="token punctuation">,</span> <span class="token function">Range</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">1</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><img src="/shader_img1.jpg" alt="display">  </p>
+<p>surf函数中</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">surf</span><span class="token punctuation">(</span><span class="token class-name">Input</span> IN<span class="token punctuation">,</span> inout <span class="token class-name">SurfaceOutputStandard</span> o<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token comment">// 将Properties中的属性转换为GetBlurColor需要的参数</span>
+  <span class="token comment">// 这里做转换而不是直接在Properties中设置对应的值,是为了属性的可读性</span>
+  <span class="token class-name">half4</span> c <span class="token operator">=</span> <span class="token function">GetBlurColor</span><span class="token punctuation">(</span>_MainTex<span class="token punctuation">,</span> IN<span class="token punctuation">.</span>uv_MainTex<span class="token punctuation">,</span> _Radius<span class="token punctuation">,</span> _Smooth <span class="token operator">*</span> <span class="token number">100</span><span class="token punctuation">,</span> <span class="token number">0.9</span> <span class="token operator">+</span> _Power <span class="token operator">*</span> <span class="token number">0.1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  o<span class="token punctuation">.</span>Emission <span class="token operator">=</span> c<span class="token punctuation">.</span>rgb<span class="token punctuation">;</span>
+  o<span class="token punctuation">.</span>Alpha <span class="token operator">=</span> c<span class="token punctuation">.</span>a<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h2><pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp">Shader <span class="token string">"Custom/Blur"</span> <span class="token punctuation">&#123;</span>
+  Properties <span class="token punctuation">&#123;</span>
+    _MainTex <span class="token punctuation">(</span><span class="token string">"Main Texture"</span><span class="token punctuation">,</span> <span class="token number">2D</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token string">"white"</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
+    _Radius <span class="token punctuation">(</span><span class="token string">"Radius (范围)"</span><span class="token punctuation">,</span> <span class="token function">Range</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0.2</span>
+    _Smooth <span class="token punctuation">(</span><span class="token string">"Smooth (平滑度)"</span><span class="token punctuation">,</span> <span class="token function">Range</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0.5</span>
+    _Power <span class="token punctuation">(</span><span class="token string">"Power (强度)"</span><span class="token punctuation">,</span> <span class="token function">Range</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">1</span>
+  <span class="token punctuation">&#125;</span>
+  SubShader <span class="token punctuation">&#123;</span>
+    CGPROGRAM
+
+    <span class="token preprocessor property">#<span class="token directive keyword">pragma</span> surface surf Standard fullforwardshadows alpha</span>
+    <span class="token preprocessor property">#<span class="token directive keyword">pragma</span> target 3.0</span>
+
+    <span class="token keyword">struct</span> <span class="token class-name">Input</span> <span class="token punctuation">&#123;</span>
+      <span class="token class-name">float2</span> uv_MainTex<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+    <span class="token class-name">sampler2D</span> _MainTex<span class="token punctuation">;</span>
+    <span class="token class-name">half</span> _Radius<span class="token punctuation">;</span>
+    <span class="token class-name">half</span> _Smooth<span class="token punctuation">;</span>
+    <span class="token class-name">half</span> _Power<span class="token punctuation">;</span>
+
+    <span class="token return-type class-name">half4</span> <span class="token function">GetBlurColor</span><span class="token punctuation">(</span><span class="token class-name">sampler2D</span> tex<span class="token punctuation">,</span> <span class="token class-name">float2</span> uv<span class="token punctuation">,</span> <span class="token class-name">half</span> <span class="token keyword">value</span><span class="token punctuation">,</span> <span class="token class-name">half</span> step<span class="token punctuation">,</span> <span class="token class-name">half</span> percent<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+      <span class="token keyword">value</span> <span class="token operator">=</span> <span class="token function">clamp</span><span class="token punctuation">(</span><span class="token keyword">value</span><span class="token punctuation">,</span> <span class="token number">0.001</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      step <span class="token operator">=</span> <span class="token function">floor</span><span class="token punctuation">(</span><span class="token function">clamp</span><span class="token punctuation">(</span>step<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      percent <span class="token operator">=</span> <span class="token function">clamp</span><span class="token punctuation">(</span>percent<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+      <span class="token class-name">half4</span> ret <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+      <span class="token class-name">half</span> delta <span class="token operator">=</span> <span class="token keyword">value</span> <span class="token operator">*</span> <span class="token number">2</span> <span class="token operator">/</span> step<span class="token punctuation">;</span>
+      <span class="token class-name">half</span> count <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+      <span class="token class-name">half</span> compareValue <span class="token operator">=</span> <span class="token keyword">value</span> <span class="token operator">*</span> <span class="token keyword">value</span><span class="token punctuation">;</span>
+
+      <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token class-name">half</span> i <span class="token operator">=</span> <span class="token operator">-</span><span class="token keyword">value</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token keyword">value</span><span class="token punctuation">;</span> i <span class="token operator">+=</span> delta<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token class-name">half</span> j <span class="token operator">=</span> <span class="token operator">-</span><span class="token keyword">value</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> <span class="token keyword">value</span><span class="token punctuation">;</span> j <span class="token operator">+=</span> delta<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+          <span class="token keyword">if</span> <span class="token punctuation">(</span>i <span class="token operator">*</span> i <span class="token operator">+</span> j <span class="token operator">*</span> j <span class="token operator">></span> compareValue<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token keyword">continue</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+          <span class="token class-name">float2</span> tempUV <span class="token operator">=</span> uv <span class="token operator">+</span> <span class="token function">float2</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> j<span class="token punctuation">)</span><span class="token punctuation">;</span>
+          <span class="token class-name">fixed4</span> c <span class="token operator">=</span> <span class="token function">tex2D</span><span class="token punctuation">(</span>tex<span class="token punctuation">,</span> tempUV<span class="token punctuation">)</span><span class="token punctuation">;</span>
+          ret <span class="token operator">+=</span> c<span class="token punctuation">;</span>
+          count <span class="token operator">+=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+      <span class="token punctuation">&#125;</span>
+      <span class="token keyword">return</span> ret <span class="token operator">/</span> count <span class="token operator">*</span> percent <span class="token operator">+</span> <span class="token function">tex2D</span><span class="token punctuation">(</span>tex<span class="token punctuation">,</span> uv<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token number">1</span> <span class="token operator">-</span> percent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">surf</span><span class="token punctuation">(</span><span class="token class-name">Input</span> IN<span class="token punctuation">,</span> inout <span class="token class-name">SurfaceOutputStandard</span> o<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+      <span class="token class-name">half4</span> c <span class="token operator">=</span> <span class="token function">GetBlurColor</span><span class="token punctuation">(</span>_MainTex<span class="token punctuation">,</span> IN<span class="token punctuation">.</span>uv_MainTex<span class="token punctuation">,</span> _Radius<span class="token punctuation">,</span> _Smooth <span class="token operator">*</span> <span class="token number">100</span><span class="token punctuation">,</span> <span class="token number">0.9</span> <span class="token operator">+</span> _Power <span class="token operator">*</span> <span class="token number">0.1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      o<span class="token punctuation">.</span>Emission <span class="token operator">=</span> c<span class="token punctuation">.</span>rgb<span class="token punctuation">;</span>
+      o<span class="token punctuation">.</span>Alpha <span class="token operator">=</span> c<span class="token punctuation">.</span>a<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    ENDCG
+  <span class="token punctuation">&#125;</span>
+  Fallback <span class="token string">"Diffuse"</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<p>下一篇:<a href="https://jenocn.github.io/2019/09/UnitySurfaceShader5/">Unity表面着色器笔记(五)</a></p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2019/09/UnitySurfaceShader5/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2019/08/UnitySurfaceShader3/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2019-09-06 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/Unity/">Unity<span>13</span></a></li> <li><a href="/tags/Shader/">Shader<span>6</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

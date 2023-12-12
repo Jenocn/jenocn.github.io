@@ -1,0 +1,589 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>进阶版消息机制实现 | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="实现一个自动定义消息ID,按需派发消息,强类型,支持消息队列，内存安全的消息中枢系统上篇文章《代码中的消息机制》已经简单的讲解了消息机制,并附带了源码和实际使用场景,这篇文章将直接讲解如何实现进阶版消息机制  
+本文将从以下几点讲解：  
+
+实现自定义消息ID
+实现按需派发消息
+实现强类型
+实现消息队列
+实现内存安全
+完善消息队列
+附源码"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="进阶版消息机制实现"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> 进阶版消息机制实现</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <h5 id="实现一个自动定义消息ID-按需派发消息-强类型-支持消息队列，内存安全的消息中枢系统"><a href="#实现一个自动定义消息ID-按需派发消息-强类型-支持消息队列，内存安全的消息中枢系统" class="headerlink" title="实现一个自动定义消息ID,按需派发消息,强类型,支持消息队列，内存安全的消息中枢系统"></a>实现一个自动定义消息ID,按需派发消息,强类型,支持消息队列，内存安全的消息中枢系统</h5><p>上篇文章<a href="https://jenocn.github.io/2019/04/Message-in-Code/" target="_blank">《代码中的消息机制》</a>已经简单的讲解了消息机制,并附带了源码和实际使用场景,这篇文章将直接讲解如何实现进阶版消息机制  </p>
+<p>本文将从以下几点讲解：  </p>
+<ul>
+<li>实现自定义消息ID</li>
+<li>实现按需派发消息</li>
+<li>实现强类型</li>
+<li>实现消息队列</li>
+<li>实现内存安全</li>
+<li>完善消息队列</li>
+<li>附源码</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="实现自定义消息ID"><a href="#实现自定义消息ID" class="headerlink" title="实现自定义消息ID"></a>实现自定义消息ID</h2><ul>
+<li><strong>使消息的管理更方便,开发时只需要关注具体的消息即可</strong></li>
+</ul>
+<p>在上一篇的简单消息机制里,每定义一个新的消息,都要定义一个与之匹配的ID用来辨认是哪个消息,我见过的很多项目中也是如此,这样就会使我们多维护一个消息ID,即我们需要维护一个消息ID列表和一个具体消息数据的集合,这使得收发消息都不那么方便,代码也不那么优雅.那么现在就来实现一个自定义消息ID吧,将ID与类绑定,并且自增长,不需要人工去定义它.  </p>
+<p>这里结合模板来实现这个功能  </p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; 计数器, T表示当前计数器的归属
+template&lt;typename T&gt;
+class ClassTypeCounter final
+&#123;
+public:
+    &#x2F;&#x2F; 一个static的int变量用于保存数量
+    static int _count;
+    &#x2F;&#x2F; 一个成员变量,用于标记自己的位置
+    int _index&#123; 0 &#125;;
+public:
+    &#x2F;&#x2F; 每当实例化一个该对象,_index保留当前计数,然后计数器加1
+    ClassTypeCounter()
+    &#123;
+        _index &#x3D; _count;
+        ++_count;
+    &#125;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;**
+* 一个模板的ClassType基类(叫ClassType是因为ID这个说法在子类中可能会被用到,所以改成ClassType区分)
+* TClass:需要计数的类
+* TCounter:计数器的归属
+*&#x2F;
+template&lt;typename TClass, typename TCounter&gt;
+class ClassType
+&#123;
+private:
+    &#x2F;**
+    * 一个具体的计数器
+    * 这样每产生一个新的TClass,都会产生一个ClassTypeCounter&lt;TCounter&gt;的具体对象,从而实现id增长
+    *&#x2F;
+    static ClassTypeCounter&lt;TCounter&gt; __counter;
+public:
+    &#x2F;&#x2F; 获取自己的ClassType
+    static int GetClassType() &#123; return __counter._index; &#125;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>有了上面两个模板,自定义消息就OK啦,下面看怎么用</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;**
+* 消息基类,上篇中讲过的
+* 这里改成模板了,需要一个类来作为消息的计数器归属,这里用一个IMessage
+* 嗯? 为什么加了个IMessage,后面说,这里先加上
+*&#x2F;
+template&lt;typename T&gt;
+class MessageBase : public ClassType&lt;T, IMessage&gt;
+&#123;
+public:
+    &#x2F;&#x2F; 这里需要实现一下IMessage里的接口
+    virtual int GetMessageID() const
+    &#123;
+        &#x2F;&#x2F; 因为有了ClassType计数器了,哈哈,是不是很方便
+        return MessageBase&lt;T&gt;::GetClassType();
+    &#125;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; IMessage需要定义一下
+class IMessage &#123;
+public:
+    virtual ~IMessage() &#123;&#125;
+    &#x2F;&#x2F; 这里需要这个接口,来给实例调用
+    virtual int GetMessageID() const &#x3D; 0;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>具体的使用就像这样,跟之前使用一样哦,就是继承时多传个类型,把自己传过去,记一下数:</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">class MyMessage : public Message&lt;MyMessage&gt;
+&#123;
+    &#x2F;&#x2F; some parameters...
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>然后那个MessageType的枚举就可以干掉了,改成这样使用</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">int main()
+&#123;
+    MessageCenter::AddListener(&quot;listener&quot;, [](IMessage* message)&#123;
+        if (message-&gt;GetMessageID() &#x3D;&#x3D; MyMessage::GetClassType())
+        &#123;
+            &#x2F;&#x2F; todo...
+        &#125;
+    &#125;);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>到这里,自定义ID就已经完成啦.  </p>
+<h2 id="实现按需派发消息"><a href="#实现按需派发消息" class="headerlink" title="实现按需派发消息"></a>实现按需派发消息</h2><ul>
+<li><strong>监听者只监听自己关心的消息</strong>  </li>
+<li><strong>监听消息时不用再判断消息是不是自己想要的,提高效率,代码也好看</strong></li>
+</ul>
+<p>按需派发消息的好处是很多的,一个监听者只负责监听一个消息,没有自己的消息时就不回调,这样使得大型开发中使用消息也能管理的井井有条,功能开发模块化,需要监听就添加,不需要就删除  </p>
+<p>有了上面的自定义消息ID,这个就很简单了,但是呢,这里先说简单的思路,但不具体实现,后面强类型那里再具体实现,为什么这样做呢,是因为结合强类型,可以不用单独去关心ID,只关心具体的消息就行了  </p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; 简单做法就是添加监听者的时候给一个ID参数
+&#x2F;&#x2F; 在Send消息的时候判断一下messageID是不是与Message的GetClassType()相同就行了
+static void AddListener(const std::string&amp; name, int messageID, std::function&lt;void(IMessage*)&gt; func);
+&#x2F;&#x2F; 使用时就这样,但是这样无疑增加了一个不必要的参数,后面结合强类型来实现
+MessageCenter::AddListener(&quot;Listener&quot;, MyMessage::GetClassType(), [](IMessage* message)&#123; &#125;);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; 还有一个方法就是使用模板
+template&lt;typename T&gt;
+static void AddListener(const std::string&amp; name, std::function&lt;void(IMessage*)&gt; func) &#123;
+    &#x2F;&#x2F; T::GetClassType();就可以获取到这个消息的ID了,这也体现了自定义ID的好处,减少参数是好的
+&#125;
+&#x2F;&#x2F; 这样调用的时候就是
+MessageCenter::AddListener&lt;MyMessage&gt;(&quot;Listener&quot;, [](IMessage* message)&#123; &#125;);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>按需派发消息就先到这里了.</p>
+<h2 id="实现强类型"><a href="#实现强类型" class="headerlink" title="实现强类型"></a>实现强类型</h2><ul>
+<li><strong>省去了类型的转换</strong>  </li>
+<li><strong>更安全,具体逻辑不再需要转换类型</strong>  </li>
+<li><strong>即拿即用,很方便</strong></li>
+</ul>
+<p>强类型就是指,消息在接收时,能够保持消息原本的类型,而不是一个基类类型.这样做的好处就是接收到的消息不用转换,编译器会强制你使用正确的类型,提高了代码的健壮性,用起来也很舒服  </p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; 需要一个MessageListener&lt;T&gt;类来保存类型
+&#x2F;&#x2F; 这里需要一个IMessageListener,是因为MessageCenter需要统一保存所有Listener
+template&lt;typename T&gt;
+class MessageListener : public IMessageListener
+&#123;
+public:
+    MessageListener(std::function&lt;void(T*)&gt; func)
+        : _func(func)
+    &#123;&#125;
+public:
+    &#x2F;&#x2F; 提供给MessageCenter调用
+    virtual void Invoke(IMessage* message)
+    &#123;
+        &#x2F;&#x2F; 因为有类型,所以可以转换啦
+        &#x2F;&#x2F; 然后因为是按需派发,所以这里的message就是T*类型
+        _func(static_cast&lt;T*&gt;(message));
+    &#125;
+
+    &#x2F;&#x2F; 返回一下ID,这是实现自IMessageListener的,MessageCenter需要用
+    virtual int GetMessageID() const
+    &#123;
+        return T::GetMessageID();
+    &#125;
+private:
+    std::function&lt;void(T*)&gt; _func;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; IMessageListener
+class IMessageListener
+&#123;
+public:
+    virtual ~IMessageListener() &#123;&#125;
+    virtual void Invoke(IMessage* message) &#x3D; 0;
+    virtual int GetMessageID() const &#x3D; 0;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>MessageListener在实际使用时是不需要关心的  </p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; MessageCenter这边的处理以及按需派发的实现  
+&#x2F;&#x2F; 这里只贴关键代码,全部源码请在文章最后查看
+&#x2F;&#x2F; MessageCenter类
+class MessageCenter
+&#123;
+public:
+    &#x2F;&#x2F; 使用模板,还有function里面的参数也使用的T
+    template&lt;typename T&gt;
+    static void AddListener(const std::string&amp; name, std::function&lt;void(T*)&gt; func)
+    &#123;
+        &#x2F;&#x2F; ... 此处省略参数有效性的判断
+        &#x2F;&#x2F; 关键代码一行
+        IMessage* listener &#x3D; new MessageListener&lt;T&gt;(func);
+        &#x2F;&#x2F; 添加到监听器集合
+        _listenerMap.emplace(name, listener);
+    &#125;
+
+    &#x2F;&#x2F; 派发消息,按需派发
+    static void Send(IMessage* message)
+    &#123;
+        if (!message) &#123; return; &#125;
+        &#x2F;&#x2F; 遍历监听者
+        for (auto&amp; pair : _listenerMap)
+        &#123;
+            auto listener &#x3D; pair.second;
+            &#x2F;&#x2F; 判断消息ID是否一致,如果是则回调
+            if (message-&gt;GetMessageID() &#x3D;&#x3D; listener-&gt;GetMessageID())
+            &#123;
+                listener-&gt;Invoke(message);
+            &#125;
+        &#125;
+    &#125;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; 调用方式
+MessageCenter::AddListener&lt;MyMessage&gt;(&quot;Listener&quot;, [](MyMessage* message)&#123;
+    &#x2F;&#x2F; message-&gt;param1; 就可以直接拿到属性了
+&#125;);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>到这里,按需派发和强类型就搞定啦.</p>
+<h2 id="实现消息队列"><a href="#实现消息队列" class="headerlink" title="实现消息队列"></a>实现消息队列</h2><ul>
+<li><strong>先将消息入队,当调用派发的时候,再统一发送</strong>  </li>
+<li><strong>游戏开发时,可以在下一帧发送消息,好处坏处都有,看需要</strong></li>
+</ul>
+<p>消息队列可以先Push消息,然后在合适的时机再Dispatch派发消息,因为不是立即调用,好处和坏处并存,看需要  </p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; MessageCenter类
+&#x2F;&#x2F; 定义一个消息队列
+std::list&lt;IMessage*&gt; _messageQueue;
+&#x2F;&#x2F; 增加一个Push方法
+static void Push(IMessage* message)
+&#123;
+    if (!message) &#123; return; &#125;
+    &#x2F;&#x2F; 首先这里会有内存隐患,后面内存安全部分讲解如何处理
+    &#x2F;&#x2F; 隐患:你不知道message是一个动态创建的对象还是一个局部变量的地址
+    _messageQueue.emplace_back(message);
+&#125;
+&#x2F;&#x2F; 增加一个OnDispatch方法
+static void OnDispatch()
+&#123;
+    for (auto message : _messageQueue)
+    &#123;
+        Send(message);
+        &#x2F;&#x2F; 安全隐患
+        delete message;
+    &#125;
+    _messageQueue.clear();
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>很多项目的做法是拷贝一个消息,但是我不建议这样做,而且无法做到完美深拷贝,而且使用的过程可能还会出很多问题,性能也会大打折扣,所以后面的安全部分讲解如何使用更好的方法解决  </p>
+<h2 id="内存安全"><a href="#内存安全" class="headerlink" title="内存安全"></a>内存安全</h2><p>C++开发的其中一个难点就是需要管理内存,当你开发一个通用工具时,最重要的就是它是安全可靠的,这样才用的放心,消息机制是需要被大量使用的,一个好的消息机制不应该在使用时来管理内存,这里的实现借助于std::shared_ptr</p>
+<p>std::shared_ptr内部基于引用计数,重写了拷贝构造,在拷贝时就会增加引用,std::shared_ptr销毁时就会减少引用  </p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; MessageBase中
+&#x2F;&#x2F; 使用一个名称表示std::shared_ptr&lt;IMessage&gt;
+using MessagePtr &#x3D; std::shared_ptr&lt;IMessage&gt;;
+&#x2F;&#x2F; MessageBase增加方法,这样可以简化创建std::shared_ptr&lt;T&gt;
+static std::shared_ptr&lt;T&gt; Create()
+&#123;
+        return std::shared_ptr&lt;T&gt;(new T());
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; MessageCenter中
+&#x2F;&#x2F; 消息队列
+static std::list&lt;MessagePtr&gt; _messageQueue;
+&#x2F;&#x2F; 派发消息
+static void Send(MessagePtr message);
+static void Push(MessagePtr message);
+&#x2F;&#x2F; 添加监听者
+template&lt;typename T&gt;
+static void AddListener(const std::string&amp; name, std::function&lt;void(std::shared_ptr&lt;T&gt; message)&gt; func);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; MessageListener
+&#x2F;&#x2F; _func需要保留类型,使用std::shared_ptr&lt;T&gt;
+std::function&lt;void(std::shared_ptr&lt;T&gt;)&gt; _func;
+&#x2F;&#x2F; 参数使用 MessagePtr
+virtual void Invoke(MessagePtr message)
+&#123;
+    &#x2F;&#x2F; 这里使用std::static_pointer_cast&lt;T&gt;
+    &#x2F;&#x2F; 将std::shared_ptr&lt;IMessage&gt;转换为std::shared_ptr&lt;T&gt;
+    _func(std::static_pointer_cast&lt;T&gt;(message));
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>具体的代码可以看文章最后附带的源码  </p>
+<h1 id="完善消息队列"><a href="#完善消息队列" class="headerlink" title="完善消息队列"></a>完善消息队列</h1><p>处理完安全隐患之后,可以把注意力再回到消息队列,在OnDispatch回调时继续Push消息会出现问题,因为在遍历一个列表时不建议往里面添加新的元素,虽然有一些其他的解决方法,这里我使用双缓冲的方法  </p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; 需要两个消息队列
+&#x2F;&#x2F; 一个true标记的队列,一个false标记的队列
+static std::map&lt;bool, std::list&lt;MessagePtr&gt;&gt; _messageQueue;
+&#x2F;&#x2F; 用于标记当前活跃的队列
+static bool _activeQueueSign;
+&#x2F;&#x2F; 私有方法,获取活跃队列
+static std::list&lt;MessagePtr&gt;&amp; _GetActiveQueue();
+&#x2F;&#x2F; 私有方法,获取闲置队列
+static std::list&lt;MessagePtr&gt;&amp; _GetIdleQueue();
+&#x2F;&#x2F; OnDispatch
+void OnDispatch()
+&#123;
+    &#x2F;&#x2F; 切换标记
+    _activeQueueSign &#x3D; !_activeQueueSign;
+    &#x2F;&#x2F; 从活跃队列中派发消息
+    for (auto message : _GetActiveQueue())
+    &#123;
+        Send(message);
+    &#125;
+    _GetActiveQueue().clear();
+&#125;
+&#x2F;&#x2F; 添加到闲置队列中
+void Push(MessagePtr message)
+&#123;
+    if (!message) &#123; return; &#125;
+    _GetIdleQueue().emplace_back(message);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><p>新建一个MessageDefine.h文件,存放所有消息</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; MessageDefine.h 
+
+&#x2F;&#x2F; 包含MessageCenter.h头文件即可
+#include &quot;MessageCenter.h&quot;
+
+&#x2F;&#x2F; 新增一个具体消息
+class MyMessage : public MessageBase&lt;MyMessage&gt;
+&#123;
+public:
+    &#x2F;&#x2F; some parameters
+    int value1;
+    float value2;
+    std::string value3;
+    &#x2F;&#x2F; ...
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>使用的地方</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; main.cpp
+
+&#x2F;&#x2F; 包含你自己的消息头文件
+#include &quot;MessageDefine.h&quot;
+
+void main()
+&#123;
+    &#x2F;&#x2F; 监听
+    MessageCenter::AddListener&lt;MyMessage&gt;(&quot;main&quot;, [](std::shared_ptr&lt;MyMessage&gt; msg)&#123;
+        &#x2F;&#x2F; todo...
+    &#125;);
+
+    &#x2F;&#x2F; 创建一个消息
+    auto message &#x3D; MyMessage::Create();
+    &#x2F;&#x2F; 赋值
+    message-&gt;value1 &#x3D; 1;
+    message-&gt;value2 &#x3D; 3.14f;
+    message-&gt;value3 &#x3D; &quot;Hello&quot;:
+    &#x2F;&#x2F; 发送
+    MessageCenter::Send(message);
+    &#x2F;**
+    &#x2F;&#x2F; 入队
+    MessageCenter::Push(message);
+    &#x2F;&#x2F; 派发
+    MessageCenter::OnDispatch();
+    *&#x2F;
+
+    &#x2F;&#x2F; 删除监听
+    MessageCenter::RemoveListener(&quot;main&quot;);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="附源码"><a href="#附源码" class="headerlink" title="附源码"></a>附源码</h2><p><a href="https://github.com/Jenocn/MessageCenter" target="_blank">https://github.com/Jenocn/MessageCenter</a>  </p>
+<p>这篇文章到这里就结束啦,至此,整个消息机制也告一段落啦,希望看过之后对你能有帮助,如有问题可以邮我,一起交流学习!  </p>
+<p>上一篇:《代码中的消息机制》<br><a href="https://jenocn.github.io/2019/04/Message-in-Code/" target="_blank">https://jenocn.github.io/2019/04/Message-in-Code/</a><br>转载请注明出处: <a href="https://jenocn.github.io/2019/04/MessageCenter/" target="_blank">https://jenocn.github.io/2019/04/MessageCenter/</a>  </p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2019/04/Vue-Good/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2019/04/Message-in-Code/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2019-04-24 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/C/">C++<span>7</span></a></li> <li><a href="/tags/设计模式/">设计模式<span>2</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

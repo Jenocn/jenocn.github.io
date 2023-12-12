@@ -1,0 +1,514 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>使用GameScript与命令模式在Unity中构建剧情模块 | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="剧情的文本和展示条件往往需要频繁的修改,不管是交给剧情策划,还是自己独立开发写剧情,都会希望剧情能够方便的修改,不需要过多的涉及代码改动,所以结合脚本来构建剧情模块,是最快捷的方案.
+本文:
+
+剧情管理器
+命令模式实现UI展示的调用
+GameScript接入
+脚本函数与命令绑定
+剧情触发器"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="使用GameScript与命令模式在Unity中构建剧情模块"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> 使用GameScript与命令模式在Unity中构建剧情模块</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>剧情的文本和展示条件往往需要频繁的修改,不管是交给剧情策划,还是自己独立开发写剧情,都会希望剧情能够方便的修改,不需要过多的涉及代码改动,所以结合脚本来构建剧情模块,是最快捷的方案.</p>
+<p>本文:</p>
+<ul>
+<li>剧情管理器</li>
+<li>命令模式实现UI展示的调用</li>
+<li>GameScript接入</li>
+<li>脚本函数与命令绑定</li>
+<li>剧情触发器</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="剧情管理器"><a href="#剧情管理器" class="headerlink" title="剧情管理器"></a>剧情管理器</h2><p>剧情管理器的作用是对剧情的调用方式做一个抽象,一方面提供更方便的接口给调用端使用,比如触发剧情第一章第一节,触发NPC某某某的对话等等,另一方面是对接脚本函数</p>
+<p><strong>接口设计</strong><br>先设计接口,具体实现暂时不管,保持模块的一个大概思路,后面的实现就是一步步完成就好了</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">StoryManager</span> <span class="token punctuation">:</span> <span class="token type-list"><span class="token class-name">Singleton<span class="token punctuation">&lt;</span>StoryManager<span class="token punctuation">></span></span></span> <span class="token punctuation">&#123;</span>
+  <span class="token comment">// 执行主线故事(参数为:章,节))</span>
+  <span class="token keyword">public</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">ExecuteMainStory</span><span class="token punctuation">(</span><span class="token class-name"><span class="token keyword">int</span></span> chapter<span class="token punctuation">,</span> <span class="token class-name"><span class="token keyword">int</span></span> part<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">// 执行支线故事</span>
+  <span class="token keyword">public</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">ExecuteSubSotry</span><span class="token punctuation">(</span><span class="token class-name"><span class="token keyword">int</span></span> chapter<span class="token punctuation">,</span> <span class="token class-name"><span class="token keyword">int</span></span> part<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">// 执行NPC对话</span>
+  <span class="token keyword">public</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">ExecuteNpcTalk</span><span class="token punctuation">(</span><span class="token class-name"><span class="token keyword">int</span></span> npcID<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">// 根据游戏的需要,还可以扩展更多的方法</span>
+  <span class="token comment">// more ...</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>调用:</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">// 执行第一章第一节的剧情</span>
+StoryManager<span class="token punctuation">.</span><span class="token function">GetInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">ExecuteMainStory</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>实现这几个方法,就需要结合脚本.</p>
+<h2 id="命令模式实现UI展示的调用"><a href="#命令模式实现UI展示的调用" class="headerlink" title="命令模式实现UI展示的调用"></a>命令模式实现UI展示的调用</h2><p>具体的展示如何做,每个游戏都不一样,这一块不是本文的重点,这里做了一个简单的显示方式,如下图:<br><img src="/talk_box.png" alt="display"></p>
+<p><strong>命令模式结合消息控制UI的展示</strong><br>一个命令基类:</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token keyword">public</span> <span class="token keyword">abstract</span> <span class="token keyword">class</span> <span class="token class-name">GameCommandBase</span> <span class="token punctuation">&#123;</span>
+  <span class="token comment">// 用于标记命令是否结束</span>
+  <span class="token keyword">protected</span> <span class="token class-name"><span class="token keyword">bool</span></span> _bFinish <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+  <span class="token comment">// 执行命令的方法,子类去实现</span>
+  <span class="token keyword">public</span> <span class="token keyword">abstract</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">public</span> <span class="token keyword">virtual</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">OnEnter</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
+  <span class="token keyword">public</span> <span class="token keyword">virtual</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">OnExit</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
+
+  <span class="token keyword">public</span> <span class="token return-type class-name"><span class="token keyword">bool</span></span> <span class="token function">IsFinish</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> _bFinish<span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>各类具体的命令:<br>这里使用到了消息模式,关于消息模式可以参考我的另一篇文章<a href="https://jenocn.github.io/2019/04/MessageCenter/">&lt;&lt;进阶版消息机制实现&gt;&gt;</a></p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">StoryCommand</span> <span class="token punctuation">:</span> <span class="token type-list"><span class="token class-name">GameCommandBase</span></span> <span class="token punctuation">&#123;</span>
+
+  <span class="token comment">// 对话的文本</span>
+  <span class="token keyword">public</span> <span class="token class-name"><span class="token keyword">string</span></span> content <span class="token operator">=</span> <span class="token string">""</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">public</span> <span class="token keyword">override</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">OnEnter</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    _bFinish <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 这里监听剧情对话的结束消息</span>
+    MessageCenter<span class="token punctuation">.</span><span class="token function">AddListener</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token class-name">OnStoryTalkClose</span> msg<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
+      _bFinish <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+
+  <span class="token keyword">public</span> <span class="token keyword">override</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">OnExit</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    MessageCenter<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">RemoveListener</span><span class="token generic class-name"><span class="token punctuation">&lt;</span>OnStoryTalkClose<span class="token punctuation">></span></span></span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+
+  <span class="token keyword">public</span> <span class="token keyword">override</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 发送一个剧情对话的播放消息,会在负责显示对话UI的类中监听这个消息</span>
+    <span class="token class-name"><span class="token keyword">var</span></span> msg <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token constructor-invocation class-name">OnCommandStoryTalk</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    msg<span class="token punctuation">.</span>content <span class="token operator">=</span> content<span class="token punctuation">;</span>
+    MessageCenter<span class="token punctuation">.</span><span class="token function">Send</span><span class="token punctuation">(</span>msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>对于其他播放音效等命令就不再贴代码了,实现思路与这个一样.</p>
+<p><strong>命令管理器</strong><br>命令管理器是负责批处理命令的中枢系统</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">class</span> <span class="token class-name">CommandSystem</span> <span class="token punctuation">&#123;</span>
+  <span class="token comment">// 一个用于存放一组命令的队列,后面会从队列中按顺序取出并执行</span>
+  <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token class-name">Queue<span class="token punctuation">&lt;</span>GameCommandBase<span class="token punctuation">></span></span> _cmdQueue <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token constructor-invocation class-name">Queue<span class="token punctuation">&lt;</span>GameCommandBase<span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">// 当前的命令</span>
+  <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token class-name">GameCommandBase</span> _currentCmd <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// 入队一个命令</span>
+  <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">PushCMD</span><span class="token punctuation">(</span><span class="token class-name">GameCommandBase</span> cmd<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    _cmdQueue<span class="token punctuation">.</span><span class="token function">Enqueue</span><span class="token punctuation">(</span>cmd<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+
+  <span class="token comment">// 执行</span>
+  <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 当前命令存在的话不能重复执行</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>_currentCmd <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token keyword">return</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+    <span class="token comment">// 队列中不存在命令也无法执行</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>_cmdQueue<span class="token punctuation">.</span>Count <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token keyword">return</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+    <span class="token comment">// 取出命令,执行命令</span>
+    _currentCmd <span class="token operator">=</span> _cmdQueue<span class="token punctuation">.</span><span class="token function">Dequeue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _currentCmd<span class="token punctuation">.</span><span class="token function">OnEnter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _currentCmd<span class="token punctuation">.</span><span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+
+  <span class="token comment">// Update函数,用于检测命令的结束,并自动进入下一个命令</span>
+  <span class="token comment">// Update方法需要放在一个场景的Update中去执行</span>
+  <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">Update</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 当前命令不存在则不继续</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>_currentCmd <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token keyword">return</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+    <span class="token comment">// 当前命令未完成则不继续</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>_currentCmd<span class="token punctuation">.</span><span class="token function">IsFinish</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token keyword">return</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+    <span class="token comment">// 执行当前命令退出</span>
+    _currentCmd<span class="token punctuation">.</span><span class="token function">OnExit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _currentCmd <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token comment">// 继续执行下一个命令</span>
+    <span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>以上就打通了UI展示部分的调用,只要在任意地方调用如下:</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">// 创建一个命令</span>
+<span class="token class-name"><span class="token keyword">var</span></span> cmd <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token constructor-invocation class-name">StoryCommand</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 显示的文本</span>
+cmd<span class="token punctuation">.</span>content <span class="token operator">=</span> <span class="token string">"这里很危险,快回去!"</span><span class="token punctuation">;</span>
+<span class="token comment">// 入队</span>
+CommandSystem<span class="token punctuation">.</span><span class="token function">PushCMD</span><span class="token punctuation">(</span>cmd<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 如果有多个命令</span>
+<span class="token comment">// more push ...</span>
+<span class="token comment">// 执行</span>
+CommandSystem<span class="token punctuation">.</span><span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="GameScript接入"><a href="#GameScript接入" class="headerlink" title="GameScript接入"></a>GameScript接入</h2><blockquote>
+<p>Github:<br><a target="_blank" rel="noopener" href="https://github.com/Jenocn/GameScript">https://github.com/Jenocn/GameScript</a>  </p>
+</blockquote>
+<p>GameScript是我自己写的一个基于字符串解析的脚本语言,优点就是接入方便,直接将DLL拖入Unity,无需配置,就可以直接使用.</p>
+<p><em>(这里使用其他脚本语言,思路都是一样的)</em>  </p>
+<p><strong>设计剧情脚本的管理方式</strong><br>我的设计思路是一个片段为一个脚本文件,这样也是方便后期的查找和修改<br>例如主线第一章第一节的剧情文件为:<code>main_1_1.gs.txt</code><br>支线则为:<code>sub_1_1.gs.txt</code>这种形式<br>id为10001的npc的对话为:<code>npc_10001.gs.txt</code></p>
+<p><strong>设计脚本函数</strong><br>播放对话:<br><code>StoryTalk(content)</code><br>播放音频:<br><code>Audio(kindID, audioName, volume)</code><br>播放BGM:<br><code>Music(musicName, volume)</code><br>等待second秒:<br><code>Wait(second)</code><br>执行操作:<br><code>Execute()</code></p>
+<p><strong>具体内容编写</strong></p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">// main_1_1.gs.txt</span>
+<span class="token function">entry</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token comment">// 播放一个bgm</span>
+  <span class="token function">Music</span><span class="token punctuation">(</span><span class="token string">"sotry_bgm"</span><span class="token punctuation">,</span> <span class="token number">0.8</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">// 播放一个对话音效</span>
+  <span class="token function">Audio</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">"voice_1"</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">// 播放对话</span>
+  <span class="token function">StoryTalk</span><span class="token punctuation">(</span><span class="token string">"这里很危险,快回去!"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">// 执行</span>
+  <span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="脚本函数与命令绑定"><a href="#脚本函数与命令绑定" class="headerlink" title="脚本函数与命令绑定"></a>脚本函数与命令绑定</h2><p>在StoryManager中增加一个初始化方法,并注册脚本函数:</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">// gs为GameScript的命名空间</span>
+<span class="token keyword">using</span> <span class="token namespace">gs</span><span class="token punctuation">;</span>
+
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">StoryManager</span> <span class="token punctuation">:</span> <span class="token type-list"><span class="token class-name">Singleton<span class="token punctuation">&lt;</span>StoryManager<span class="token punctuation">></span></span></span> <span class="token punctuation">&#123;</span>
+  <span class="token comment">// 定义一个公共函数(GameScript的思路是函数看成一个空间,函数内可以包含函数)</span>
+  <span class="token keyword">private</span> <span class="token class-name">VMFunction</span> _storyDefine <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">public</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">Init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 加载公共空间的脚本,可以写一些公共的内容</span>
+    <span class="token comment">// 这里的 GSSystem.LoadScript 本质上如下,后面的内容将不再解释</span>
+    <span class="token comment">// GSSystem.LoadScript 会做一些安全判断</span>
+    <span class="token comment">/*
+    var textAsset = Resources.Load&lt;TextAsset>("story/define.gs");
+    _storyDefine = VM.Load(textAsset.text);
+    */</span>
+    _storyDefine <span class="token operator">=</span> GSSystem<span class="token punctuation">.</span><span class="token function">LoadScript</span><span class="token punctuation">(</span><span class="token string">"story/define.gs"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 执行一遍,创建公共对象</span>
+    _storyDefine<span class="token punctuation">.</span><span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token comment">// 注册 StoryTalk 函数</span>
+    _storyDefine<span class="token punctuation">.</span><span class="token function">RegisterFunction</span><span class="token punctuation">(</span><span class="token string">"StoryTalk"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token class-name">List<span class="token punctuation">&lt;</span>VMValue<span class="token punctuation">></span></span> args<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
+      <span class="token comment">// 参数验证</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>args<span class="token punctuation">.</span>Count <span class="token operator">&lt;</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token keyword">return</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+      <span class="token comment">// 创建命令</span>
+      <span class="token class-name"><span class="token keyword">var</span></span> cmd <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token constructor-invocation class-name">GameCommand<span class="token punctuation">.</span>StoryCommand</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      cmd<span class="token punctuation">.</span>content <span class="token operator">=</span> args<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">ToString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      CommandSystem<span class="token punctuation">.</span><span class="token function">PushCMD</span><span class="token punctuation">(</span>cmd<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 注册 Execute 函数</span>
+    _storyDefine<span class="token punctuation">.</span><span class="token function">RegisterFunction</span><span class="token punctuation">(</span><span class="token string">"Execute"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token class-name">List<span class="token punctuation">&lt;</span>VMValue<span class="token punctuation">></span></span> args<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
+      CommandSystem<span class="token punctuation">.</span><span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 注册其他函数,就不再详细写,思路一样</span>
+    <span class="token comment">// more ...</span>
+  <span class="token punctuation">&#125;</span>
+
+  <span class="token comment">// other ...</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><strong>实现调用剧情的方法</strong>  </p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token keyword">public</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">ExecuteMainStory</span><span class="token punctuation">(</span><span class="token class-name"><span class="token keyword">int</span></span> chapter<span class="token punctuation">,</span> <span class="token class-name"><span class="token keyword">int</span></span> part<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token function">_ExecuteStory</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> chapter<span class="token punctuation">,</span> part<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">public</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">ExecuteSubStory</span><span class="token punctuation">(</span><span class="token class-name"><span class="token keyword">int</span></span> chapter<span class="token punctuation">,</span> <span class="token class-name"><span class="token keyword">int</span></span> part<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token function">_ExecuteStory</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> chapter<span class="token punctuation">,</span> part<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">/**
+  type: 0表示主线,1表示支线
+*/</span>
+<span class="token keyword">private</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">_ExecuteStory</span><span class="token punctuation">(</span><span class="token class-name"><span class="token keyword">int</span></span> type<span class="token punctuation">,</span> <span class="token class-name"><span class="token keyword">int</span></span> chapter<span class="token punctuation">,</span> <span class="token class-name"><span class="token keyword">int</span></span> part<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token class-name"><span class="token keyword">string</span></span> storySign <span class="token operator">=</span> <span class="token string">""</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>type <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    storySign <span class="token operator">=</span> <span class="token string">"main"</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>type <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    storySign <span class="token operator">=</span> <span class="token string">"sub"</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+
+  <span class="token comment">// 加载脚本文件,并且将_storyDefine作为父空间,这样就可以调用父空间注册的函数了</span>
+  <span class="token class-name"><span class="token keyword">var</span></span> func <span class="token operator">=</span> GSSystem<span class="token punctuation">.</span><span class="token function">LoadScript</span><span class="token punctuation">(</span><span class="token keyword">string</span><span class="token punctuation">.</span><span class="token function">Format</span><span class="token punctuation">(</span><span class="token string">"story/&#123;0&#125;_&#123;1&#125;_&#123;2&#125;.gs"</span><span class="token punctuation">,</span> storySign<span class="token punctuation">,</span> chapter<span class="token punctuation">,</span> part<span class="token punctuation">)</span><span class="token punctuation">,</span> _storyDefine<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>func <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token keyword">return</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+  <span class="token comment">// 执行文件</span>
+  func<span class="token punctuation">.</span><span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">// 获取其中的entry方法</span>
+  <span class="token class-name"><span class="token keyword">var</span></span> entryFunc <span class="token operator">=</span> func<span class="token punctuation">.</span><span class="token function">GetFunction</span><span class="token punctuation">(</span><span class="token string">"entry"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>entryFunc <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 执行entry()</span>
+    entryFunc<span class="token punctuation">.</span><span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="剧情触发器"><a href="#剧情触发器" class="headerlink" title="剧情触发器"></a>剧情触发器</h2><p>触发器就是在游戏中发生某些条件的时候,我们接收到这个条件做什么事情,这里将触发条件回调到脚本中,就可以在脚本中处理具体的条件,并播放剧情了</p>
+<p>这个仍然可以在剧情管理器中实现:</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token keyword">using</span> <span class="token namespace">gs</span><span class="token punctuation">;</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">StoryManager</span> <span class="token punctuation">:</span> <span class="token type-list"><span class="token class-name">Singleton<span class="token punctuation">&lt;</span>StoryManager<span class="token punctuation">></span></span></span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">private</span> <span class="token class-name">VMFunction</span> _storyTrigger <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">public</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">Init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 需要创建story/trigger.gs这个文件</span>
+    _storyTrigger <span class="token operator">=</span> GSSystem<span class="token punctuation">.</span><span class="token function">LoadScript</span><span class="token punctuation">(</span><span class="token string">"story/trigger.gs"</span><span class="token punctuation">,</span> _storyDefine<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _storyTrigger<span class="token punctuation">.</span><span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 注册一个主线剧情回调的方法</span>
+    _storyDefine<span class="token punctuation">.</span><span class="token function">RegisterFunction</span><span class="token punctuation">(</span><span class="token string">"MainStory"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token class-name">List<span class="token punctuation">&lt;</span>VMValue<span class="token punctuation">></span></span> args<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>args<span class="token punctuation">.</span>Count <span class="token operator">&lt;</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token keyword">return</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>args<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">IsNumber</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> args<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">IsNumber</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">ExecuteMainStory</span><span class="token punctuation">(</span>args<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">GetInt</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> args<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">GetInt</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// other ...</span>
+  <span class="token punctuation">&#125;</span>
+  <span class="token comment">// other ...</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>然后例如收到某个事件,比如角色升级:<br>在StoryManager中添加触发器</p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token keyword">public</span> <span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">OnLevelUp</span><span class="token punctuation">(</span><span class="token class-name"><span class="token keyword">int</span></span> cur<span class="token punctuation">,</span> <span class="token class-name"><span class="token keyword">int</span></span> to<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token comment">// 回调触发器脚本的OnLevelUp方法</span>
+  <span class="token class-name"><span class="token keyword">var</span></span> func <span class="token operator">=</span> _storyTrigger<span class="token punctuation">.</span><span class="token function">GetFunction</span><span class="token punctuation">(</span><span class="token string">"OnLevelUp"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>func<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">List<span class="token punctuation">&lt;</span>VMValue<span class="token punctuation">></span></span> args <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token constructor-invocation class-name">List<span class="token punctuation">&lt;</span>VMValue<span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    args<span class="token punctuation">.</span><span class="token function">Add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token constructor-invocation class-name">VMValue</span><span class="token punctuation">(</span>cur<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    args<span class="token punctuation">.</span><span class="token function">Add</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token constructor-invocation class-name">VMValue</span><span class="token punctuation">(</span>to<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    func<span class="token punctuation">.</span><span class="token function">Execute</span><span class="token punctuation">(</span>args<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>触发器脚本:<br><code>trigger.gs.txt</code></p>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token function">OnLevelUp</span><span class="token punctuation">(</span>cur<span class="token punctuation">,</span> to<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token comment">// 判断到达5级,触发主线第一章第一节</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>to <span class="token operator">==</span> <span class="token number">5</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 调用主线剧情</span>
+    <span class="token function">MainStory</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>到这里,整个就完成了,剩下的就是慢慢完善和填充内容,本文提供的是一个思路,希望能够帮助到需要的人.</p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a href="/2019/12/MakeRuleTileByPython/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2019/09/WriteCommonCode3/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2019-10-09 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>28</span></a></li> <li><a href="/tags/Unity/">Unity<span>13</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2023 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>
