@@ -143,7 +143,7 @@ myAnimation<span class="token punctuation">?.</span><span class="token function"
 <p>上面的调用是没有问题的,但是需要注意的是,在Unity中调用引擎自带的组件时,那么问题就来了,例如:</p>
 <pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token class-name"><span class="token keyword">var</span></span> ps <span class="token operator">=</span> <span class="token generic-method"><span class="token function">GetComponent</span><span class="token generic class-name"><span class="token punctuation">&lt;</span>ParticleSystem<span class="token punctuation">></span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 ps<span class="token punctuation">?.</span><span class="token function">Play</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 这里会报错</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<p>报错如下:<br><img src="/img1.png" alt="error_img"></p>
+<p>报错如下:<br><img src="/2021/10/CSharpQuestionMarkInUnity/img1.png" alt="error_img"></p>
 <p>按道理说,<code>ps?.Play();</code>的调用,如果没有找到则不执行,但问题就在,实际上这个<code>ps</code>对象并不是真正的<code>null</code></p>
 <p><strong>Unity在使用<code>GetComponent</code>调用内部组件时,即使当前对象没有包含该组件,也不会返回<code>null</code>,而是返回一个UnityEngine.Object意义上的”空”对象,而UnityEngine.Object重写了&#x3D;&#x3D;,!&#x3D;相关的操作符,使得我们使用if去判断时可以正确执行,而使用<code>?</code>符号去执行时并不会调用重写的操作符因此就出错了</strong></p>
 <p><strong>所以在使用<code>GetComponent</code>调用内部组件时,不要再使用<code>?</code>符号了,对于自己写的脚本则可以继续使用</strong></p>

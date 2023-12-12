@@ -99,9 +99,9 @@
 	  <p>Mesh是计算机模型的网格结构，由点线面组成的形状来表现的，在建模的过程中就是在操作这些点线面的坐标和大小等信息来做出想要的模型形状</p>
 <span id="more"></span>
 
-<p><img src="/img0.jpeg" alt="img0">  </p>
+<p><img src="/2022/12/UnityMeshNote/img0.jpeg" alt="img0">  </p>
 <h2 id="Unity-Mesh属性和用法"><a href="#Unity-Mesh属性和用法" class="headerlink" title="Unity Mesh属性和用法"></a>Unity Mesh属性和用法</h2><h3 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h3><p>三角形是构成面的最小图形，所以Mesh是由一个个三角形组成的网格<br><strong>顶点集合 vertices：</strong> 组成几何图形的点的坐标的集合<br><strong>三角形集合 trangles：</strong> 组成三角形的顶点序号集合<br><strong>法线集合 normals：</strong> 每个顶点的法线<br><strong>纹理坐标 uv</strong> 顶点和纹理贴图的位置关系  </p>
-<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><p><img src="/img1.png" alt="img1"><br>如图的四边形，四个点的坐标分别为：<br>A(0, 0, 0)<br>B(0, 1, 0)<br>C(1, 0, 0)<br>D(1, 1, 0)</p>
+<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><p><img src="/2022/12/UnityMeshNote/img1.png" alt="img1"><br>如图的四边形，四个点的坐标分别为：<br>A(0, 0, 0)<br>B(0, 1, 0)<br>C(1, 0, 0)<br>D(1, 1, 0)</p>
 <p>在Mesh中，ABCD四个点为顶点，按照三角形为单位绘制，四边形是由两个三角形组成，绘制时按顺时针的顺序，即T1(ABC),T2(CBD)</p>
 <p>所以代码中：</p>
 <pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">// 顶点坐标</span>

@@ -110,9 +110,9 @@
 
 <h2 id="打包"><a href="#打包" class="headerlink" title="打包"></a>打包</h2><p>首先打包AssetBundle需要选择要打包的内容,然后使用打包方法打包.</p>
 <p><strong>第一步 选定打包的内容</strong><br>在资源目录内,选中要打包的文件夹或者文件,选择文件夹时,会包含文件夹内的所有内容,选中后,可以看到<code>Inspector</code>最下方有一个<code>Asset Labels</code>选项,点击后会出现<code>AssetBundle</code>选项,有两个下拉列表,前者选择包的文件名,后者选择后缀名</p>
-<p><img src="/step1_1.jpg" alt="step1">  </p>
+<p><img src="/2020/03/UnityAssetBundle/step1_1.jpg" alt="step1">  </p>
 <p>已经设置过的名称会出现在列表中,如果需要新建则选择<code>New...</code>选项,手动输入名称  </p>
-<p><img src="/step1_2.jpg" alt="step1"></p>
+<p><img src="/2020/03/UnityAssetBundle/step1_2.jpg" alt="step1"></p>
 <p>名称支持目录形式,使用<code>/</code>方式分割,例如<code>audio/sound</code>表示将<code>sound</code>包放在<code>audio</code>文件夹下</p>
 <p>注意:一个AssetBundle包内的资源文件名不能相同,即使在不同路径下</p>
 <p><strong>第二步 打包方法调用</strong>  </p>
@@ -140,7 +140,7 @@
 <span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>通过菜单<code>Assets-&gt;Build AssetBundle</code>,调用之后就会根据之前的配置将打包后的文件导出在<code>项目/AssetBundle/</code>下了,比如我设置的<code>bgm</code>资源</p>
-<p><img src="/step2_1.jpg" alt="step2"></p>
+<p><img src="/2020/03/UnityAssetBundle/step2_1.jpg" alt="step2"></p>
 <p>关于参数2:</p>
 <pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token keyword">using</span> <span class="token namespace">System</span><span class="token punctuation">;</span>
 

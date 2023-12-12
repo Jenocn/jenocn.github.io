@@ -102,8 +102,8 @@
 <hr>
 <p>上一篇:<a href="https://jenocn.github.io/2019/09/UnitySurfaceShader5/">Unity表面着色器笔记(五)</a></p>
 <hr>
-<p>效果展示:<br><img src="/burn_shader_display.gif" alt="display"></p>
-<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>实现这个效果需要一张用于混合的燃烧纹理图片,例如:<br><img src="/burn_texture.jpg" alt="burn"></p>
+<p>效果展示:<br><img src="/2020/01/UnitySurfaceShader6/burn_shader_display.gif" alt="display"></p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>实现这个效果需要一张用于混合的燃烧纹理图片,例如:<br><img src="/2020/01/UnitySurfaceShader6/burn_texture.jpg" alt="burn"></p>
 <p>在燃烧过程中,由于温度是不平均的,所以温度最高的地方先燃烧,然后逐渐向边缘燃烧<br>基于以上条件,在shader中根据红色程度来透明我们的目标图片,并在过渡边缘逐渐混合燃烧纹理,达到拟真的情况</p>
 <p>设一个值Percent用于表示当前的燃烧程度,该值的范围从0~1,值越大,燃烧的越多,将这个值与rgb中的r做对比,Percent超出了r的值则将对应的像素透明化,然后还没超的r值根据一定的比例混合燃烧纹理,已达到边缘渐变效果</p>
 <h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>定义需要的属性</p>

@@ -100,7 +100,7 @@
 <span id="more"></span>
 
 <p><strong>什么是广度优先遍历？</strong><br>广度优先遍历就是从一个起始点开始，先遍历周围的子节点，再遍历子节点周围的节点，按顺序层层递进，直到全部遍历完。</p>
-<p><strong>用树形结构解释</strong><br>树也是图的一种，使用二叉树来展示更加简单、容易理解，从根节点开始遍历，如下图：<br><img src="/img1.gif" alt="图1"><br>得到的结果是[1,2,3,4,5,6,7]</p>
+<p><strong>用树形结构解释</strong><br>树也是图的一种，使用二叉树来展示更加简单、容易理解，从根节点开始遍历，如下图：<br><img src="/2023/06/bfs/img1.gif" alt="图1"><br>得到的结果是[1,2,3,4,5,6,7]</p>
 <p><strong>代码实现</strong><br>实现思路为使用一个队列来维护遍历的顺序，先根再左右子节点，依次添加到队尾，从队首逐个拿取。</p>
 <pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">// 创建一个节点用于表示二叉树的结构</span>
 <span class="token keyword">class</span> <span class="token class-name">Node</span> <span class="token punctuation">&#123;</span>

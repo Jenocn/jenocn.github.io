@@ -103,7 +103,7 @@
 <p>上一篇:<a href="https://jenocn.github.io/2019/09/UnitySurfaceShader4/">Unity表面着色器笔记(四)</a></p>
 <hr>
 <p>效果展示:</p>
-<p><img src="/shader_img2.jpg" alt="display"></p>
+<p><img src="/2019/09/UnitySurfaceShader5/shader_img2.jpg" alt="display"></p>
 <h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>描边也有很多实现方法吧,我的办法是,检测一个透明像素的周围是否有非透明像素,如果有,则将当前透明像素填充为描边颜色</p>
 <h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>还是封装一个方法比较简洁</p>
 <pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">/**
@@ -150,7 +150,7 @@
   _Precision <span class="token punctuation">(</span><span class="token string">"Precision (精确度)"</span><span class="token punctuation">,</span> <span class="token function">Range</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0.99</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0.5</span>
 <span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<p><img src="/shader_img1.jpg" alt="propteties"></p>
+<p><img src="/2019/09/UnitySurfaceShader5/shader_img1.jpg" alt="propteties"></p>
 <p>surf函数中</p>
 <pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">surf</span><span class="token punctuation">(</span><span class="token class-name">Input</span> IN<span class="token punctuation">,</span> inout <span class="token class-name">SurfaceOutputStandard</span> o<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
   <span class="token comment">// 调用即可</span>

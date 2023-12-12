@@ -102,7 +102,7 @@
 <hr>
 <p>上一篇:<a href="https://jenocn.github.io/2019/08/UnitySurfaceShader3/">Unity表面着色器笔记(三)</a></p>
 <hr>
-<p>效果展示:<br><img src="/shader_img2.jpg" alt="display">  </p>
+<p>效果展示:<br><img src="/2019/09/UnitySurfaceShader4/shader_img2.jpg" alt="display">  </p>
 <h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>毛玻璃效是一种模糊效果,实现思路应该有很多吧,这里采用最简单的一种方式,以像素为圆心,取周围半径范围内颜色的平均值,即可得到</p>
 <h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>首先封装一个方法来实现模糊效果  </p>
 <pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token comment">/**
@@ -156,7 +156,7 @@
   _Power <span class="token punctuation">(</span><span class="token string">"Power (强度)"</span><span class="token punctuation">,</span> <span class="token function">Range</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">1</span>
 <span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<p><img src="/shader_img1.jpg" alt="display">  </p>
+<p><img src="/2019/09/UnitySurfaceShader4/shader_img1.jpg" alt="display">  </p>
 <p>surf函数中</p>
 <pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token return-type class-name"><span class="token keyword">void</span></span> <span class="token function">surf</span><span class="token punctuation">(</span><span class="token class-name">Input</span> IN<span class="token punctuation">,</span> inout <span class="token class-name">SurfaceOutputStandard</span> o<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
   <span class="token comment">// 将Properties中的属性转换为GetBlurColor需要的参数</span>

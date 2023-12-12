@@ -99,14 +99,14 @@
 	  <p>TiledMap中的RuleTile是非常好用的2d刷地形工具,当你设置好各种相邻条件的图块后,刷地形时它会根据相邻的情况使用对应的图块,这样会更加方便.</p>
 <span id="more"></span>
 
-<p><img src="/terrain_temp.jpg" alt="TerrainDisplay"></p>
+<p><img src="/2019/12/MakeRuleTileByPython/terrain_temp.jpg" alt="TerrainDisplay"></p>
 <h2 id="RuleTile"><a href="#RuleTile" class="headerlink" title="RuleTile"></a>RuleTile</h2><p>我自己因为需要制作地图,采用了这个方式,但是绘制时遇到了一个问题,那就是条件实在太多了,有47种情况,这要画起来那得多让人崩溃.</p>
-<p><img src="/ruletile_inspector.jpg" alt="RuleTile"></p>
-<p><img src="/condition47.jpg" alt="condition47"></p>
+<p><img src="/2019/12/MakeRuleTileByPython/ruletile_inspector.jpg" alt="RuleTile"></p>
+<p><img src="/2019/12/MakeRuleTileByPython/condition47.jpg" alt="condition47"></p>
 <p>不过可以发现,很多图块都有很多部位是重复的,将这些重复区域提取出来,会发现是由这样一个基础图块组成的</p>
-<p><img src="/metatile.jpg" alt="Metatile"></p>
+<p><img src="/2019/12/MakeRuleTileByPython/metatile.jpg" alt="Metatile"></p>
 <p>这是粒度更小的基础图块,每4个可以组合成一个大图块,只要绘制这样一个基础图块,我们就可以生成那47个大图块</p>
-<p><img src="/merge.png" alt="Merge"></p>
+<p><img src="/2019/12/MakeRuleTileByPython/merge.png" alt="Merge"></p>
 <h2 id="使用Python编写"><a href="#使用Python编写" class="headerlink" title="使用Python编写"></a>使用Python编写</h2><p>有了这样一个元图块集和映射关系,就不需要手动去拼接,这时候使用python去编写一个拼接工具</p>
 <h4 id="Image类"><a href="#Image类" class="headerlink" title="Image类"></a>Image类</h4><h5 id="paste-from-box-cur-box-粘贴方法"><a href="#paste-from-box-cur-box-粘贴方法" class="headerlink" title="paste(from_box, cur_box)粘贴方法"></a><code>paste(from_box, cur_box)</code>粘贴方法</h5><p>接受两个参数<br><code>from_box</code>表示从基础图片中置顶区域的切图<br><code>cur_box</code>表示粘贴到自身图片的目标区域</p>
 <h5 id="crop-box-切图方法"><a href="#crop-box-切图方法" class="headerlink" title="crop(box)切图方法"></a><code>crop(box)</code>切图方法</h5><p><code>box</code>表示切图区域</p>

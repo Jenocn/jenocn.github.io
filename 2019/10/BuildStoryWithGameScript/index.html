@@ -132,7 +132,7 @@ GameScript接入
 StoryManager<span class="token punctuation">.</span><span class="token function">GetInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">ExecuteMainStory</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>实现这几个方法,就需要结合脚本.</p>
-<h2 id="命令模式实现UI展示的调用"><a href="#命令模式实现UI展示的调用" class="headerlink" title="命令模式实现UI展示的调用"></a>命令模式实现UI展示的调用</h2><p>具体的展示如何做,每个游戏都不一样,这一块不是本文的重点,这里做了一个简单的显示方式,如下图:<br><img src="/talk_box.png" alt="display"></p>
+<h2 id="命令模式实现UI展示的调用"><a href="#命令模式实现UI展示的调用" class="headerlink" title="命令模式实现UI展示的调用"></a>命令模式实现UI展示的调用</h2><p>具体的展示如何做,每个游戏都不一样,这一块不是本文的重点,这里做了一个简单的显示方式,如下图:<br><img src="/2019/10/BuildStoryWithGameScript/talk_box.png" alt="display"></p>
 <p><strong>命令模式结合消息控制UI的展示</strong><br>一个命令基类:</p>
 <pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token keyword">public</span> <span class="token keyword">abstract</span> <span class="token keyword">class</span> <span class="token class-name">GameCommandBase</span> <span class="token punctuation">&#123;</span>
   <span class="token comment">// 用于标记命令是否结束</span>
