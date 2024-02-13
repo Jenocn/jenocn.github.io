@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>计算机图形学中的变换矩阵</title>
+      <link href="/2024/02/matrix-for-cg/"/>
+      <url>/2024/02/matrix-for-cg/</url>
+      
+        <content type="html"><![CDATA[<p>计算机图形学中,使用矩阵的能够简单高效的操作图形的缩放、移动、旋转操作.</p><span id="more"></span><h2 id="齐次坐标"><a href="#齐次坐标" class="headerlink" title="齐次坐标"></a>齐次坐标</h2><h2 id="移动"><a href="#移动" class="headerlink" title="移动"></a>移动</h2><h2 id="缩放"><a href="#缩放" class="headerlink" title="缩放"></a>缩放</h2><h2 id="旋转"><a href="#旋转" class="headerlink" title="旋转"></a>旋转</h2>]]></content>
+      
+      
+      <categories>
+          
+          <category> 计算机图形学 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 计算机图形学 </tag>
+            
+            <tag> 矩阵 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>广度优先遍历</title>
       <link href="/2023/06/bfs/"/>
       <url>/2023/06/bfs/</url>
@@ -17,6 +44,8 @@
             <tag> 编程 </tag>
             
             <tag> 数据结构 </tag>
+            
+            <tag> 算法 </tag>
             
         </tags>
       
