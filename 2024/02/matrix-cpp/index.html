@@ -1,0 +1,498 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>C++实现矩阵模板类 | Jenocn</title>
+  <meta name="author" content="Jenocn">
+  
+  <meta name="description" content="矩阵">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="C++实现矩阵模板类"/>
+  <meta property="og:site_name" content="Jenocn"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+    <link rel="alternative" href="/atom.xml" title="Jenocn" type="application/atom+xml">
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/prism.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Jenocn</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> C++实现矩阵模板类</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  
+		 <div class="alert alert-success description">
+			<i class="fa fa-info-circle"></i> 矩阵
+		 </div> <!-- alert -->
+	  		
+
+	  <p>在计算机中，矩阵有着广泛的应用，例如计算机图形学中，使用矩阵可以轻松的解决缩放、移动、旋转的变换问题。下面使用C++模板实现矩阵类，其中，数据类型，矩阵行列都通过模板参数来指定。</p>
+<span id="more"></span>
+
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">pragma</span> <span class="token expression">once</span></span>
+
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;cassert></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;vector></span></span>
+
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token keyword">class</span> <span class="token class-name">Matrix</span> <span class="token punctuation">&#123;</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+  <span class="token function">Matrix</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">Matrix</span><span class="token punctuation">(</span><span class="token keyword">const</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;</span> target<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">Matrix</span><span class="token punctuation">(</span>Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;&amp;</span> target<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">Matrix</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>initializer_list<span class="token operator">&lt;</span>TNUMBER<span class="token operator">></span><span class="token operator">&amp;&amp;</span> data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">Matrix</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span>TNUMBER<span class="token operator">></span><span class="token operator">&amp;&amp;</span> data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">Matrix</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">bool</span> <span class="token keyword">operator</span><span class="token operator">==</span><span class="token punctuation">(</span><span class="token keyword">const</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;</span> target<span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+  <span class="token keyword">bool</span> <span class="token keyword">operator</span><span class="token operator">!=</span><span class="token punctuation">(</span><span class="token keyword">const</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;</span> target<span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+  Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;</span> <span class="token keyword">operator</span><span class="token operator">=</span><span class="token punctuation">(</span><span class="token keyword">const</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;</span> target<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span> <span class="token keyword">operator</span><span class="token operator">+</span><span class="token punctuation">(</span>TNUMBER num<span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+  Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span> <span class="token keyword">operator</span><span class="token operator">-</span><span class="token punctuation">(</span>TNUMBER num<span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+  Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span> <span class="token keyword">operator</span><span class="token operator">*</span><span class="token punctuation">(</span>TNUMBER num<span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+  Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span> <span class="token keyword">operator</span><span class="token operator">/</span><span class="token punctuation">(</span>TNUMBER num<span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+
+  Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span> <span class="token keyword">operator</span><span class="token operator">+</span><span class="token punctuation">(</span><span class="token keyword">const</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;</span> target<span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+  Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span> <span class="token keyword">operator</span><span class="token operator">-</span><span class="token punctuation">(</span><span class="token keyword">const</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;</span> target<span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">int</span> TARGET_COL_<span class="token operator">></span>
+  Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> TARGET_COL_<span class="token operator">></span> <span class="token function">Multiply</span><span class="token punctuation">(</span><span class="token keyword">const</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> COL_<span class="token punctuation">,</span> TARGET_COL_<span class="token operator">></span><span class="token operator">&amp;</span> target<span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">int</span> X_<span class="token punctuation">,</span> <span class="token keyword">int</span> Y_<span class="token operator">></span>
+  <span class="token keyword">void</span> <span class="token function">Set</span><span class="token punctuation">(</span>TNUMBER data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">int</span> X_<span class="token punctuation">,</span> <span class="token keyword">int</span> Y_<span class="token operator">></span>
+  TNUMBER <span class="token function">Get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+  <span class="token keyword">void</span> <span class="token function">Set</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">,</span> <span class="token keyword">int</span> y<span class="token punctuation">,</span> TNUMBER data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  TNUMBER <span class="token function">Get</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">,</span> <span class="token keyword">int</span> y<span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TContainer</span><span class="token operator">></span>
+  <span class="token keyword">void</span> <span class="token function">Reset</span><span class="token punctuation">(</span>TContainer<span class="token operator">&amp;</span> data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TContainer</span><span class="token operator">></span>
+  <span class="token keyword">void</span> <span class="token function">Reset</span><span class="token punctuation">(</span>TContainer<span class="token operator">&amp;&amp;</span> data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span>TNUMBER<span class="token operator">></span><span class="token operator">&amp;</span> <span class="token function">Data</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+  <span class="token keyword">constexpr</span> <span class="token keyword">int</span> <span class="token function">Row</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+  <span class="token keyword">constexpr</span> <span class="token keyword">int</span> <span class="token function">Column</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+  <span class="token keyword">constexpr</span> <span class="token keyword">int</span> <span class="token function">Size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+
+<span class="token keyword">private</span><span class="token operator">:</span>
+  std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span>TNUMBER<span class="token operator">></span> _data<span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token keyword">constexpr</span> <span class="token keyword">int</span> _SIZE<span class="token punctuation">&#123;</span> ROW_ <span class="token operator">*</span> COL_ <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Matrix</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">static_assert</span><span class="token punctuation">(</span><span class="token operator">!</span>std<span class="token double-colon punctuation">::</span>is_class_v<span class="token operator">&lt;</span>TNUMBER<span class="token operator">></span><span class="token punctuation">,</span> <span class="token string">"TNUMBER type error"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  _data<span class="token punctuation">.</span><span class="token function">resize</span><span class="token punctuation">(</span>_SIZE<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Matrix</span><span class="token punctuation">(</span><span class="token keyword">const</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;</span> target<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  _data <span class="token operator">=</span> target<span class="token punctuation">.</span>_data<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Matrix</span><span class="token punctuation">(</span>Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;&amp;</span> target<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  _data <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span>target<span class="token punctuation">.</span>_data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Matrix</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>initializer_list<span class="token operator">&lt;</span>TNUMBER<span class="token operator">></span><span class="token operator">&amp;&amp;</span> data<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token function">Reset</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Matrix</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span>TNUMBER<span class="token operator">></span><span class="token operator">&amp;&amp;</span> data<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token function">Reset</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token keyword">bool</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token keyword">operator</span><span class="token operator">==</span><span class="token punctuation">(</span><span class="token keyword">const</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;</span> target<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">return</span> _data <span class="token operator">==</span> target<span class="token punctuation">.</span>_data<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token keyword">bool</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token keyword">operator</span><span class="token operator">!=</span><span class="token punctuation">(</span><span class="token keyword">const</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;</span> target<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">return</span> _data <span class="token operator">!=</span> target<span class="token punctuation">.</span>_data<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token keyword">operator</span><span class="token operator">=</span><span class="token punctuation">(</span><span class="token keyword">const</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;</span> target<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  _data <span class="token operator">=</span> target<span class="token punctuation">.</span>_data<span class="token punctuation">;</span>
+  <span class="token keyword">return</span> <span class="token operator">*</span><span class="token keyword">this</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token keyword">operator</span><span class="token operator">+</span><span class="token punctuation">(</span>TNUMBER num<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">auto</span> ret <span class="token operator">=</span> <span class="token operator">*</span><span class="token keyword">this</span><span class="token punctuation">;</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> _SIZE<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    ret<span class="token punctuation">.</span>_data<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">+=</span> num<span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+  <span class="token keyword">return</span> ret<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token keyword">operator</span><span class="token operator">-</span><span class="token punctuation">(</span>TNUMBER num<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">auto</span> ret <span class="token operator">=</span> <span class="token operator">*</span><span class="token keyword">this</span><span class="token punctuation">;</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> _SIZE<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    ret<span class="token punctuation">.</span>_data<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">-=</span> num<span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+  <span class="token keyword">return</span> ret<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token keyword">operator</span><span class="token operator">*</span><span class="token punctuation">(</span>TNUMBER num<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">auto</span> ret <span class="token operator">=</span> <span class="token operator">*</span><span class="token keyword">this</span><span class="token punctuation">;</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> _SIZE<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    ret<span class="token punctuation">.</span>_data<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">*=</span> num<span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+  <span class="token keyword">return</span> ret<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token keyword">operator</span><span class="token operator">/</span><span class="token punctuation">(</span>TNUMBER num<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">auto</span> ret <span class="token operator">=</span> <span class="token operator">*</span><span class="token keyword">this</span><span class="token punctuation">;</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> _SIZE<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    ret<span class="token punctuation">.</span>_data<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">/=</span> num<span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+  <span class="token keyword">return</span> ret<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token keyword">operator</span><span class="token operator">+</span><span class="token punctuation">(</span><span class="token keyword">const</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;</span> target<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">auto</span> ret <span class="token operator">=</span> <span class="token operator">*</span><span class="token keyword">this</span><span class="token punctuation">;</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> _SIZE<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    ret<span class="token punctuation">.</span>_data<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">+=</span> target<span class="token punctuation">.</span>_data<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+  <span class="token keyword">return</span> ret<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token keyword">operator</span><span class="token operator">-</span><span class="token punctuation">(</span><span class="token keyword">const</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token operator">&amp;</span> target<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">auto</span> ret <span class="token operator">=</span> <span class="token operator">*</span><span class="token keyword">this</span><span class="token punctuation">;</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> _SIZE<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    ret<span class="token punctuation">.</span>_data<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">+=</span> target<span class="token punctuation">.</span>_data<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+  <span class="token keyword">return</span> ret<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">int</span> TARGET_COL_<span class="token operator">></span>
+Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> TARGET_COL_<span class="token operator">></span> <span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Multiply</span><span class="token punctuation">(</span><span class="token keyword">const</span> Matrix<span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> COL_<span class="token punctuation">,</span> TARGET_COL_<span class="token operator">></span><span class="token operator">&amp;</span> target<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">constexpr</span> <span class="token keyword">int</span> tsize <span class="token operator">=</span> ROW_ <span class="token operator">*</span> TARGET_COL_<span class="token punctuation">;</span>
+  std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span>TNUMBER<span class="token operator">></span> retData<span class="token punctuation">;</span>
+  retData<span class="token punctuation">.</span><span class="token function">reserve</span><span class="token punctuation">(</span>tsize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> ROW_<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> TARGET_COL_<span class="token punctuation">;</span> <span class="token operator">++</span>j<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+      TNUMBER val <span class="token operator">=</span> <span class="token punctuation">(</span>TNUMBER<span class="token punctuation">)</span><span class="token number">0</span><span class="token punctuation">;</span>
+      <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> k <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> k <span class="token operator">&lt;</span> COL_<span class="token punctuation">;</span> <span class="token operator">++</span>k<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">int</span> indexA <span class="token operator">=</span> i <span class="token operator">*</span> COL_ <span class="token operator">+</span> k<span class="token punctuation">;</span>
+        <span class="token keyword">int</span> indexB <span class="token operator">=</span> k <span class="token operator">*</span> TARGET_COL_ <span class="token operator">+</span> j<span class="token punctuation">;</span>
+        val <span class="token operator">+=</span> <span class="token punctuation">(</span>_data<span class="token punctuation">[</span>indexA<span class="token punctuation">]</span> <span class="token operator">*</span> target<span class="token punctuation">.</span><span class="token function">Data</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">[</span>indexB<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">&#125;</span>
+      retData<span class="token punctuation">.</span><span class="token function">emplace_back</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+  <span class="token punctuation">&#125;</span>
+  <span class="token keyword">return</span> <span class="token generic-function"><span class="token function">Matrix</span><span class="token generic class-name"><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> TARGET_COL_<span class="token operator">></span></span></span><span class="token punctuation">(</span>retData<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">int</span> X_<span class="token punctuation">,</span> <span class="token keyword">int</span> Y_<span class="token operator">></span>
+<span class="token keyword">void</span> <span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Set</span><span class="token punctuation">(</span>TNUMBER data<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">static_assert</span><span class="token punctuation">(</span>X_ <span class="token operator">>=</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> X_ <span class="token operator">&lt;</span> COL_ <span class="token operator">&amp;&amp;</span> Y_ <span class="token operator">>=</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> Y_ <span class="token operator">&lt;</span> ROW_<span class="token punctuation">,</span> <span class="token string">"out of range"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">constexpr</span> <span class="token keyword">int</span> index <span class="token operator">=</span> Y_ <span class="token operator">*</span> ROW_ <span class="token operator">+</span> X_<span class="token punctuation">;</span>
+  _data<span class="token punctuation">[</span>index<span class="token punctuation">]</span> <span class="token operator">=</span> data<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">int</span> X_<span class="token punctuation">,</span> <span class="token keyword">int</span> Y_<span class="token operator">></span>
+TNUMBER <span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">static_assert</span><span class="token punctuation">(</span>X_ <span class="token operator">>=</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> X_ <span class="token operator">&lt;</span> COL_ <span class="token operator">&amp;&amp;</span> Y_ <span class="token operator">>=</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> Y_ <span class="token operator">&lt;</span> ROW_<span class="token punctuation">,</span> <span class="token string">"out of range"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">constexpr</span> <span class="token keyword">int</span> index <span class="token operator">=</span> Y_ <span class="token operator">*</span> ROW_ <span class="token operator">+</span> X_<span class="token punctuation">;</span>
+  <span class="token keyword">return</span> _data<span class="token punctuation">[</span>index<span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token keyword">void</span> <span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Set</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">,</span> <span class="token keyword">int</span> y<span class="token punctuation">,</span> TNUMBER data<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token function">assert</span><span class="token punctuation">(</span>x <span class="token operator">&lt;</span> COL_ <span class="token operator">&amp;&amp;</span> y <span class="token operator">&lt;</span> ROW_ <span class="token operator">&amp;&amp;</span> <span class="token string">"out of range"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">int</span> index <span class="token operator">=</span> y <span class="token operator">*</span> ROW_ <span class="token operator">+</span> x<span class="token punctuation">;</span>
+  _data<span class="token punctuation">[</span>index<span class="token punctuation">]</span> <span class="token operator">=</span> data<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+TNUMBER <span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Get</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">,</span> <span class="token keyword">int</span> y<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+  <span class="token function">assert</span><span class="token punctuation">(</span>x <span class="token operator">&lt;</span> COL_ <span class="token operator">&amp;&amp;</span> y <span class="token operator">&lt;</span> ROW_ <span class="token operator">&amp;&amp;</span> <span class="token string">"out of range"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">int</span> index <span class="token operator">=</span> y <span class="token operator">*</span> ROW_ <span class="token operator">+</span> x<span class="token punctuation">;</span>
+  <span class="token keyword">return</span> _data<span class="token punctuation">[</span>index<span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TContainer</span><span class="token operator">></span>
+<span class="token keyword">void</span> <span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Reset</span><span class="token punctuation">(</span>TContainer<span class="token operator">&amp;</span> data<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token function">Reset</span><span class="token punctuation">(</span><span class="token function">TContainer</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TContainer</span><span class="token operator">></span>
+<span class="token keyword">void</span> <span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Reset</span><span class="token punctuation">(</span>TContainer<span class="token operator">&amp;&amp;</span> data<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">static_assert</span><span class="token punctuation">(</span><span class="token operator">!</span>std<span class="token double-colon punctuation">::</span>is_class_v<span class="token operator">&lt;</span>TNUMBER<span class="token operator">></span><span class="token punctuation">,</span> <span class="token string">"TNUMBER type error"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>data<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> _SIZE<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    _data <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+  <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>data<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">></span> _SIZE<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">assert</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token string">"Matrix init warning!"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _data<span class="token punctuation">.</span><span class="token function">reserve</span><span class="token punctuation">(</span>_SIZE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _data<span class="token punctuation">.</span><span class="token function">insert</span><span class="token punctuation">(</span>_data<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> data<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> data<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> _SIZE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+  <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>data<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> _SIZE<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">assert</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token string">"Matrix init warning!"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _data<span class="token punctuation">.</span><span class="token function">reserve</span><span class="token punctuation">(</span>_SIZE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    _data <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> _SIZE <span class="token operator">-</span> data<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+      _data<span class="token punctuation">.</span><span class="token function">emplace_back</span><span class="token punctuation">(</span><span class="token punctuation">(</span>TNUMBER<span class="token punctuation">)</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span>TNUMBER<span class="token operator">></span><span class="token operator">&amp;</span> <span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Data</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">return</span> _data<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token keyword">constexpr</span> <span class="token keyword">int</span> <span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Row</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">return</span> ROW_<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token keyword">constexpr</span> <span class="token keyword">int</span> <span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Column</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">return</span> COL_<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">template</span> <span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">TNUMBER</span><span class="token punctuation">,</span> <span class="token keyword">int</span> ROW_<span class="token punctuation">,</span> <span class="token keyword">int</span> COL_<span class="token operator">></span>
+<span class="token keyword">constexpr</span> <span class="token keyword">int</span> <span class="token class-name">Matrix</span><span class="token operator">&lt;</span>TNUMBER<span class="token punctuation">,</span> ROW_<span class="token punctuation">,</span> COL_<span class="token operator">></span><span class="token double-colon punctuation">::</span><span class="token function">Size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">return</span> _SIZE<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a type="button" class="btn btn-default disabled"><i class="fa fa-arrow-circle-o-left"></i>上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2023/06/bfs/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+-->
+	
+	
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2024-02-29 
+	</div>
+	
+
+	<!-- categories -->
+    
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
+    <ul id="categorys" class="tag_box list-unstyled collapse in">
+          
+  <li>
+    <li><a href="/categories/编程/">编程<span>1</span></a></li>
+  </li>
+
+    </ul>
+	</div>
+	
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/编程/">编程<span>29</span></a></li> <li><a href="/tags/C/">C++<span>8</span></a></li> <li><a href="/tags/矩阵/">矩阵<span>1</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	   <a data-toggle="collapse" data-target="#toc"><i class="fa fa-bars"></i></a>
+	   <div id="toc" class="toc collapse in">
+		   <span class="toc-title">Contents</span>
+			
+		</div>
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2024 Jenocn's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>
