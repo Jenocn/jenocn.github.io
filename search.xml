@@ -4,6 +4,27 @@
   
     
     <entry>
+      <title>C++中const、constexpr、consteval、constinit的区别</title>
+      <link href="/2024/05/cpp_const/"/>
+      <url>/2024/05/cpp_const/</url>
+      
+        <content type="html"><![CDATA[<p>const，用来表示常量，即值在创建后不会改变，但const声明的常量发生在运行时，因此编译期是无法知道这个值的。于是，C++11中增加了constexpr，C++20中又增加了consteval和constinit。</p><span id="more"></span><h2 id="constexpr"><a href="#constexpr" class="headerlink" title="constexpr"></a>constexpr</h2><p>constexpr可以用来修饰函数和常量，与const不同的地方在于，constexpr修饰的常量必须是编译期明确知道的值。<br>constexpr修饰的函数，若在编译期可以得出返回值，则可以作为编译期可获得结果的常量使用，否则为运行时获得结果的函数。<br>下面简单举例说明：</p><pre class="line-numbers language-CPP" data-language="CPP"><code class="language-CPP">&#x2F;&#x2F; 两数求和constexpr int Sum(int a, int b) &#123;  return a + b;&#125;void main() &#123;  &#x2F;&#x2F; 若参数为编译期常量，则该函数可以作为编译期可获得结果的常量  Sum(1, 2);  &#x2F;&#x2F; 若参数为变量，则该函数不能在编译期获得结果，即不可当作编译期常量使用。  int a &#x3D; 1;  int b &#x3D; 2;  Sum(a, b);&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><h2 id="consteval"><a href="#consteval" class="headerlink" title="consteval"></a>consteval</h2><p>consteval只能用于修饰函数，使用该函数时必须在编译期能够获取返回值，否则编译不能通过。</p><h2 id="constinit"><a href="#constinit" class="headerlink" title="constinit"></a>constinit</h2><p>constinit与上述都不同，用来约束目标必须是在static生命周期下的目标，用以确保变量在程序初始化时就已经能够获得其值。</p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> 编程 </tag>
+            
+            <tag> C++ </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>C++实现矩阵模板类</title>
       <link href="/2024/02/matrix-cpp/"/>
       <url>/2024/02/matrix-cpp/</url>
@@ -111,8 +132,6 @@
         <tags>
             
             <tag> 编程 </tag>
-            
-            <tag> 技巧 </tag>
             
             <tag> C++ </tag>
             
@@ -236,15 +255,13 @@
       <link href="/2019/12/CrashWithCpp/"/>
       <url>/2019/12/CrashWithCpp/</url>
       
-        <content type="html"><![CDATA[<p>其实归结起来,崩溃问题就一种,那就是访问了无效的内存地址,体现在具体的代码上无非两种情况,数组越界和失效的指针,下面将细说这两种情况,并且如何避免.</p><span id="more"></span><h2 id="数组越界"><a href="#数组越界" class="headerlink" title="数组越界"></a>数组越界</h2><h3 id="c数组"><a href="#c数组" class="headerlink" title="c数组"></a>c数组</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">T value[10];value[11]; &#x2F;&#x2F; crash<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre><p><strong>危险度:★★★★★</strong></p><p><strong>描述:</strong><br>这种数组有比较好的性能,但往往不便于管理.<br><strong>建议:</strong><br>1.数组长度使用枚举,常量或者宏<br>2.封装一个获取数值的方法,例如<code>GetArrValue(int index)</code>,方法内判断<code>index &gt;= 0 &amp;&amp; index &lt; length</code></p><h3 id="std-vector"><a href="#std-vector" class="headerlink" title="std::vector"></a>std::vector</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">std::vector&lt;T&gt; vec;vec[100]; &#x2F;&#x2F; crash when (100 &gt;&#x3D; vec.size())<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre><p><strong>危险度:★★★★☆</strong><br><strong>描述:</strong><br>c数组的替代品,大部分场合下使用,都可以忽略数组长度,但是还是有很多场合下会导致数组越界,因为它仍然可以通过下标去获取元素<br><strong>建议:</strong><br>在使用时依然要判断下标的范围,比如<code>index &gt;= 0 &amp;&amp; index &lt; vec.size()</code>,建议根据需要封装方法来获取元素</p><h2 id="野指针"><a href="#野指针" class="headerlink" title="野指针"></a>野指针</h2><h3 id="未初始化指针"><a href="#未初始化指针" class="headerlink" title="未初始化指针"></a>未初始化指针</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">T* p;p-&gt;func(); &#x2F;&#x2F; crashif (p) &#123;  p-&gt;func(); &#x2F;&#x2F; crash too&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p><strong>危险度:★★★★★</strong><br><strong>描述:</strong><br>未初始化的指针指向未知的地址,而不是<code>nullptr</code>或者<code>0</code>,这样会使得你在做指针判空时失效<code>if(p)</code><br><strong>建议:</strong><br>养成初始化的好习惯,由于c++新特性,都不需要在构造函数的初始化列表中去初始化了,只需要<code>int* p&#123; nullptr &#125;</code>在声明时这样写一下就ok了,你还懒得写初始化吗?编程是一项严谨的事情.</p><h3 id="内存被释放"><a href="#内存被释放" class="headerlink" title="内存被释放"></a>内存被释放</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">T* p &#x3D; new T();delete p;&#x2F;&#x2F; ...p-&gt;func(); &#x2F;&#x2F; crashif (p) &#123;  p-&gt;func(); &#x2F;&#x2F; crash too&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p><strong>危险度:★★★★★</strong><br><strong>描述:</strong><br>因为指向的内存已经被释放,导致后面的调用失效,这种情况写的不好会非常难找,而且开发时往往还容易遇到很多<br><strong>建议:</strong><br>1.delete之后,一定要给指针赋值为空.</p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">T* p &#x3D; new T();T* other &#x3D; p;delete p;p &#x3D; nullptr;&#x2F;&#x2F;...if (other) &#123;  other-&gt;func(); &#x2F;&#x2F; crash&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p><strong>危险度:★★★★★</strong><br><strong>描述:</strong><br>多个指针指向同一个内存地址,某个地方被释放了,而其他指针不知道<br><strong>建议:</strong><br>1.封装的作用在这里就体现了,不要把成员指针给外面到处赋值,否则后果自负<br>2.养成良好的成对书写习惯和谁申请谁释放的准则.哪个模块申请的内存,哪个模块负责释放.<br>3.如果确实有多个指针的需求,delete之后,请一定记得将他们赋值为nullptr<br>4.使用智能指针</p><h3 id="迭代器失效"><a href="#迭代器失效" class="headerlink" title="迭代器失效"></a>迭代器失效</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">std::vector&lt;int&gt; vec;vec.resize(10);auto ite &#x3D; vec.begin();while (ite !&#x3D; vec.end()) &#123;  if (condition) &#123;    vec.push_back(99);    std::cout &lt;&lt; *ite; &#x2F;&#x2F; crash  &#125;  ++ite;&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p><strong>危险度:★★★★☆</strong><br><strong>描述:</strong><br>迭代器失效本质上也是指向的内存区域发生变化,故而成为野指针,导致崩溃的问题<br><strong>建议:</strong><br>不要在遍历的时候去做插入和删除的事情</p><h3 id="空指针"><a href="#空指针" class="headerlink" title="空指针"></a>空指针</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">T* p &#x3D; nullptr;p-&gt;func(); &#x2F;&#x2F; crash<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre><p><strong>危险度:★★☆☆☆</strong><br><strong>描述:</strong><br>没有指向任何地址,鉴于出错时往往比较好定位,所以危险度不算太高,但出错情况还是很多的<br><strong>建议:</strong><br>做好必要的指针判空,很多时候比如加载资源,使用第三方方法获取对象,查找对象等等的操作时,都需要对指针判空.</p><h2 id="最后"><a href="#最后" class="headerlink" title="最后:"></a>最后:</h2><p>避免写出可能崩溃的代码,需要保持良好的代码书写和书写约束,保持高内聚低耦合,保持良好的封装,保持有效的安全判断</p>]]></content>
+        <content type="html"><![CDATA[<p>其实归结起来,崩溃问题就一种,那就是访问了无效的内存地址,体现在具体的代码上无非两种情况,数组越界和失效的指针,下面将细说这两种情况,并且如何避免.</p><span id="more"></span><h2 id="数组越界"><a href="#数组越界" class="headerlink" title="数组越界"></a>数组越界</h2><h3 id="c数组"><a href="#c数组" class="headerlink" title="c数组"></a>c数组</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">T value[10];value[11]; &#x2F;&#x2F; crash<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre><p><strong>危险度:★★★</strong></p><p><strong>描述:</strong><br>这种数组有比较好的性能,但往往不便于管理.<br><strong>建议:</strong><br>1.数组长度使用枚举,常量或者宏<br>2.封装一个获取数值的方法,例如<code>GetArrValue(int index)</code>,方法内判断<code>index &gt;= 0 &amp;&amp; index &lt; length</code></p><h3 id="std-vector"><a href="#std-vector" class="headerlink" title="std::vector"></a>std::vector</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">std::vector&lt;T&gt; vec;vec[100]; &#x2F;&#x2F; crash when (100 &gt;&#x3D; vec.size())<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre><p><strong>危险度:★★☆</strong><br><strong>描述:</strong><br>c数组的替代品,大部分场合下使用,都可以忽略数组长度,但是还是有很多场合下会导致数组越界,因为它仍然可以通过下标去获取元素<br><strong>建议:</strong><br>在使用时依然要判断下标的范围,比如<code>index &gt;= 0 &amp;&amp; index &lt; vec.size()</code>,建议根据需要封装方法来获取元素</p><h2 id="野指针"><a href="#野指针" class="headerlink" title="野指针"></a>野指针</h2><h3 id="未初始化指针"><a href="#未初始化指针" class="headerlink" title="未初始化指针"></a>未初始化指针</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">T* p;p-&gt;func(); &#x2F;&#x2F; crashif (p) &#123;  p-&gt;func(); &#x2F;&#x2F; crash too&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p><strong>危险度:★★★</strong><br><strong>描述:</strong><br>未初始化的指针指向未知的地址,而不是<code>nullptr</code>或者<code>0</code>,这样会使得你在做指针判空时失效<code>if(p)</code><br><strong>建议:</strong><br>养成初始化的好习惯,由于c++新特性,都不需要在构造函数的初始化列表中去初始化了,只需要<code>int* p&#123; nullptr &#125;</code>在声明时这样写一下就ok了,你还懒得写初始化吗?编程是一项严谨的事情.</p><h3 id="内存被释放"><a href="#内存被释放" class="headerlink" title="内存被释放"></a>内存被释放</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">T* p &#x3D; new T();delete p;&#x2F;&#x2F; ...p-&gt;func(); &#x2F;&#x2F; crashif (p) &#123;  p-&gt;func(); &#x2F;&#x2F; crash too&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p><strong>危险度:★★★</strong><br><strong>描述:</strong><br>因为指向的内存已经被释放,导致后面的调用失效,这种情况写的不好会非常难找,而且开发时往往还容易遇到很多<br><strong>建议:</strong><br>1.delete之后,一定要给指针赋值为空.</p><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">T* p &#x3D; new T();T* other &#x3D; p;delete p;p &#x3D; nullptr;&#x2F;&#x2F;...if (other) &#123;  other-&gt;func(); &#x2F;&#x2F; crash&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p><strong>危险度:★★★</strong><br><strong>描述:</strong><br>多个指针指向同一个内存地址,某个地方被释放了,而其他指针不知道<br><strong>建议:</strong><br>1.封装的作用在这里就体现了,不要把成员指针给外面到处赋值,否则后果自负<br>2.养成良好的成对书写习惯和谁申请谁释放的准则.哪个模块申请的内存,哪个模块负责释放.<br>3.如果确实有多个指针的需求,delete之后,请一定记得将他们赋值为nullptr<br>4.使用智能指针</p><h3 id="迭代器失效"><a href="#迭代器失效" class="headerlink" title="迭代器失效"></a>迭代器失效</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">std::vector&lt;int&gt; vec;vec.resize(10);auto ite &#x3D; vec.begin();while (ite !&#x3D; vec.end()) &#123;  if (condition) &#123;    vec.push_back(99);    std::cout &lt;&lt; *ite; &#x2F;&#x2F; crash  &#125;  ++ite;&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre><p><strong>危险度:★★☆</strong><br><strong>描述:</strong><br>迭代器失效本质上也是指向的内存区域发生变化,故而成为野指针,导致崩溃的问题<br><strong>建议:</strong><br>不要在遍历的时候去做插入和删除的事情</p><h3 id="空指针"><a href="#空指针" class="headerlink" title="空指针"></a>空指针</h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">T* p &#x3D; nullptr;p-&gt;func(); &#x2F;&#x2F; crash<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre><p><strong>危险度:★☆☆</strong><br><strong>描述:</strong><br>没有指向任何地址,鉴于出错时往往比较好定位,所以危险度不算太高,但出错情况还是很多的<br><strong>建议:</strong><br>做好必要的指针判空,很多时候比如加载资源,使用第三方方法获取对象,查找对象等等的操作时,都需要对指针判空.</p><h2 id="最后"><a href="#最后" class="headerlink" title="最后:"></a>最后:</h2><p>避免写出可能崩溃的代码,需要保持良好的代码书写和书写约束,保持高内聚低耦合,保持良好的封装,保持有效的安全判断</p>]]></content>
       
       
       
         <tags>
             
             <tag> 编程 </tag>
-            
-            <tag> 技巧 </tag>
             
             <tag> C++ </tag>
             
@@ -308,8 +325,6 @@
         <tags>
             
             <tag> 编程 </tag>
-            
-            <tag> 技巧 </tag>
             
         </tags>
       
@@ -528,8 +543,6 @@
         <tags>
             
             <tag> 编程 </tag>
-            
-            <tag> 技巧 </tag>
             
         </tags>
       
