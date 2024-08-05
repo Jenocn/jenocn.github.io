@@ -8,7 +8,7 @@ tags: [设计模式, C++]
 
 **实现一个自动定义消息ID,按需派发消息,强类型,支持消息队列，内存安全的消息中枢系统**  
 
-上篇文章<a href="https://jenocn.github.io/2019/04/Message-in-Code/" target="_blank">《代码中的消息机制》</a>已经简单的讲解了消息机制,并附带了源码和实际使用场景,这篇文章将直接讲解如何实现进阶版消息机制  
+上篇文章<a href="https://jenocn.github.io/code/pattern/Message" target="_blank">《代码中的消息机制》</a>已经简单的讲解了消息机制,并附带了源码和实际使用场景,这篇文章将直接讲解如何实现进阶版消息机制  
 
 本文将从以下几点讲解：  
 - 实现自定义消息ID
